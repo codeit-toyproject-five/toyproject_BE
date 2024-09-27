@@ -1,10 +1,27 @@
-GET http://localhost:3000/api/groups
+POST  http://localhost:3000/api/groups
 Content-Type: application/json
 
 {
-  "name":"string",
-  "password": "string",
+  "name":"건아들",
+  "password": "건아건아",
   "imageUrl": "string",
+  "isPublic": false,
+  "introduction": "건아와 건아들"
+}
+
+###
+
+GET http://localhost:3000/api/groups?page=1&pageSize=10&sortBy=mostBadge&isPublic=false
+
+###
+
+PATCH http://localhost:3000/api/groups/66f2d4ecf995e15027d32547
+Content-Type: application/json
+
+{
+  "name": "Updated Group Name",
+  "password": "correctPassword",
+  "imageUrl": "http://example.com/image.jpg",
   "isPublic": true,
-  "introduction": "string"
+  "introduction": "Updated group introduction."
 }

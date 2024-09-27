@@ -29,6 +29,13 @@ const GroupSchema = new mongoose.Schema(
     },
     introduction:{
       type: String,
+    },
+    badgeCount:{
+      type: Number,
+      default: 0,
+    },
+    password:{
+      type:String,
     }
   }
 );
