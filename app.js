@@ -198,7 +198,7 @@ app.patch('/api/groups/:groupId',async (req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
   if(!group){
-    res.status(404).send({message: 'id없음'});
+    return res.status(404).send({message: 'id없음'});
   }
   if(group.password === req.body.password){
     group.name = req.body.name || group.name;
@@ -221,14 +221,14 @@ app.patch('/api/groups/:groupId',async (req,res)=>{
     res.status(403).send({message: "비번오류"});
   }
 });
-
+/*
 //그릅 삭제(수정 필요)
 app.delete('/api/groups/:groupId',async (req,res)=>{
   const password = req.body.password;
   const groupId = req.params.groupId;
   const group = await Group.findByIdAndDelete(groupId);
 });
-
+*/
 //그룹 상세 정보 조회
 app.get('/api/groups/:groupId',async (req,res)=>{
   const groupId = req.params.groupId;
@@ -242,7 +242,7 @@ app.get('/api/groups/:groupId',async (req,res)=>{
     postCount: group.postCount,
     createdAt: group.createdAt,
     introduction: group.introduction
-  })
+  });
 });
 
 //그룹 조회 권한 확인
@@ -256,14 +256,124 @@ app.post('/api/groups/:groupId/verify-password',async(req,res)=>{
 });
 
 //그룹 공감하기
-app.post('/api/groups/:groupId/like',(req,res)=>{
-
+app.post('/api/groups/:groupId/like',async(req,res)=>{
+  const groupId = req.params.groupId;
+  const group = await Group.findById(groupId);
+  group.likeCount++;
+  if(group.likeCount>=10000){
+    group.badges.push("그룹 공간 1만 개 이상 받기");
+  }
+  await group.save();
+  res.status(200).send({message: "그룹 공감하기 성공"});
 });
 
 //그룹 공개 여부 확인
-app.get('api/groups/:groupId/is-public',(req,res)=>{
-
+app.get('api/groups/:groupId/is-public',async(req,res)=>{
+  const groupId = req.params.groupId;
+  const group = await Group.findById(groupId);
+  res.status(200).json({
+    id: group._id,
+    isPublic: group.isPublic,
+  });
+});
+/*req.body
+{
+	"nickname": "string",
+	"title": "string",
+	"content": "string",
+	"postPassword": "string",
+	"groupPassword": "string",
+	"imageUrl": "string",
+	"tags": [ "string", "string" ],
+	"location": "string",
+	"moment": "2024-02-21",
+	"isPublic": true
+}
+*/
+app.post('api/groups/:groupId/posts', async(req,res)=>{
+  const groupId = req.params.groupId;
+  const req_body=req.body;
+  const post = new Post({
+    groupId: groupId,
+    ...req_body,
+    likeCount:0,
+    commentCount: 0,
+    createdAt: Date.now(),
+  });
+  const savedPost = await post.save();
+  res.status(200).send(savedPost);
 });
 
+app.get('api/groups/:groupId/posts', async(req,res)=>{
+  const groupId = req.params.groupId;
+  const page = Number(req.query.page) || 1;
+  const pageSize = Number(req.query.pageSize) || 10;
+  const sortBy = req.query.sortBy;
+  const keyword = req.query.keyword;
+  const isPublic = req.query.isPublic;
+
+  const filter = {};
+
+  //filter
+  if(groupId){
+    filter.groupId = groupId;
+  }
+  if(keyword){
+    filter.title = { $regex: keyword, $options: 'i'};
+  }
+  if(isPublic!==undefined){
+    filter.isPublic = isPublic === 'true'? true: false;
+  }
+
+  //paging
+  const skip = (page-1) * pageSize;
+
+  let sortOption;
+  switch (sortBy) {
+    case 'lastest':
+    default:
+      sortOption = { createdAt: -1};
+      break;
+    case 'mostCommented':
+      sortOption = { commentCount: -1};
+      break;
+    case 'mostLiked':
+      sortOption = { likeCount: -1};
+      break;
+  }
+  const posts = await Post.find(filter)
+    .sort(sortOption)
+    .skip(skip)
+    .limit(pageSize);
+  
+    const totlaPostCount = await Post.countDocuments(filter);
+    const totalPages = Math.ceil(totlaPostCount/pageSize);
+
+  res.status(200).json({
+    currentPage: page,
+    totalPages: totalPages,
+    totalItemCount: totlaPostCount,
+    data: posts.map(post=>({
+      id: post._id,
+      nickname: post.nickname,
+      title: post.title,
+      imageUrl: post.imageUrl,
+      tags: post.tags,
+      location: post.location,
+      moment: post.moment,
+      isPublic: post.isPublic,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      createdAt: post.createdAt
+    }))
+  })
+});
+/*
+app.patch('api/posts/:postId',async(req,res)=>{
+  const postId = req.params.postId;
+  const post = findById(postId);
+  const postpassword = req.body.postpassword;
+});
+*/
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 app.listen(3000, () => console.log('Server Started'));
