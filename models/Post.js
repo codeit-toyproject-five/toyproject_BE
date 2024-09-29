@@ -11,6 +11,9 @@ const PostSchema = new mongoose.Schema(
     title:{
       type: String,
     },
+    postPassword:{
+      type: String,
+    },
     content:{
       type: String,
     },

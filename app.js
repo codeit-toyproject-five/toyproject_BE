@@ -218,7 +218,7 @@ app.patch('/api/groups/:groupId',async (req,res)=>{
       introduction: group.introduction
     });
   } else{
-    res.status(403).send({message: "비번오류"});
+    return res.status(403).send({message: "비번오류"});
   }
 });
 /*
@@ -290,6 +290,8 @@ app.get('api/groups/:groupId/is-public',async(req,res)=>{
 	"isPublic": true
 }
 */
+
+//게시글 등록
 app.post('api/groups/:groupId/posts', async(req,res)=>{
   const groupId = req.params.groupId;
   const req_body=req.body;
@@ -304,6 +306,7 @@ app.post('api/groups/:groupId/posts', async(req,res)=>{
   res.status(200).send(savedPost);
 });
 
+//게시글 조회
 app.get('api/groups/:groupId/posts', async(req,res)=>{
   const groupId = req.params.groupId;
   const page = Number(req.query.page) || 1;
@@ -368,11 +371,98 @@ app.get('api/groups/:groupId/posts', async(req,res)=>{
     }))
   })
 });
-/*
+
+//게시글 수정
 app.patch('api/posts/:postId',async(req,res)=>{
+  const req_body = req.body;
   const postId = req.params.postId;
-  const post = findById(postId);
-  const postpassword = req.body.postpassword;
+  const post = Post.findById(postId);
+  const postPassword = req_body.postPassword;
+
+  if(post.password !== postPassword){
+    return res.status(403).send({message:"비밀번호가 틀렸습니다"});
+  }
+  post.nickname = req_body.nickname;
+  post.title = req_body.title;
+  post.content = req_body.content;
+  post.imageUrl = req_body.imageUrl;
+  post.tags = req_body.tags;
+  post.location = req_body.location;
+  post.moment = req_body.mement;
+  post.isPublic = req_body.isPublic;
+
+  const newpost = await post.save();
+
+  res.status(200).json({
+    id: newpost._id,
+    groupId: newpost.groupId,
+    nickname: newpost.nickname,
+    title: newpost.title,
+    content: newpost.content,
+    imageUrl: newpost.imageUrl,
+    tags: newpost.tags,
+    location: newpost.location,
+    moment: newpost.moment,
+    isPublic: newpost.isPublic,
+    likeCount: newpost.likeCount,
+    commentCount: newpost.commentCount,
+    createdAt: newpost.createdAt
+  })
+});
+
+//게시글 삭제
+app.delete('api/posts/:postId',async(req,res)=>{
+  const postId = req.params.postId;
+  const postPassword = req.body.postPassword;
+
+  const post = Post.findByIdAndDelete(postId)
+  res.status(200).send({message:"게시글 삭제 성공"});
+});
+
+//게시글 상세 정보 조회
+app.get('api/posts/:postId',async(req,res)=>{
+  const postId = req.params.postId;
+  
+  const post = Post.findById(postId);
+
+  res.status(200).json({
+    id: post._id,
+    groupId: post.groupId,
+    nickname: post.nickname,
+    title: post.title,
+    content: post.content,
+    imageUrl: post.imageUrl,
+    tags: post.tags,
+    location: post.location,
+    moment: post.moment,
+    isPublic: post.isPublic,
+    likeCount: post.likeCount,
+    commentCount: post.commentCount,
+    createdAt: post.createdAt
+  })
+});
+
+//게시글 조회 권한 확인
+app.post('api/posts/:postId/verify-password',async(req,res)=>{
+  const postId = req.params.postId;
+  const postPassword = req.body.password;
+
+  const post = Post.findById(postId);
+
+  if(post.postPassword!==postPassword){
+    return res.status(401).send({message: "비밀번호가 틀렸습니다"});
+  }
+  if(post.postPassword === postPassword){
+    res.status(200).send({message:"비밀번호가 확인되었습니다"});
+  }
+});
+
+/*
+//게시글 공감하기
+app.post('api/posts/:postId/like',async(req,res)=>{
+  const postId = req.params.postId;
+  
+  const 
 });
 */
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
