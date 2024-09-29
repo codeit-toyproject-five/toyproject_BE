@@ -4,9 +4,93 @@ import {DATABASE_URL} from './env.js';
 import Group from './models/Group.js';
 import Post from './models/Post.js';
 import Comment from './models/Comment.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJSDoc from 'swagger-jsdoc';
 
 const app = express();
 app.use(express.json());
+
+// Swagger 설정
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Group API',
+      version: '1.0.0',
+      description: 'API documentation for Group management',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+      },
+    ],
+  },
+  apis: ['./app.js'], // 여기에 경로를 맞춰 Swagger 주석이 있는 파일을 지정
+};
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+/**
+ * @swagger
+ * /api/groups:
+ *   post:
+ *     summary: Register a new group
+ *     description: Creates a new group with the provided details
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the group
+ *                 example: Developer Group
+ *               password:
+ *                 type: string
+ *                 description: The password for the group
+ *                 example: securepassword
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL for the group's image
+ *                 example: http://example.com/image.jpg
+ *               isPublic:
+ *                 type: boolean
+ *                 description: Is the group public or private
+ *                 example: true
+ *               introduction:
+ *                 type: string
+ *                 description: A brief introduction of the group
+ *                 example: This is a group for developers
+ *     responses:
+ *       201:
+ *         description: Group successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the created group
+ *                 name:
+ *                   type: string
+ *                   description: The name of the group
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL for the group's image
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Is the group public or private
+ *                 introduction:
+ *                   type: string
+ *                   description: A brief introduction of the group
+ *       400:
+ *         description: Invalid request
+ */
 
 //그룹 등록(/api/groups, POST)
 app.post('/api/groups',async(req,res)=>{
@@ -138,21 +222,37 @@ app.patch('/api/groups/:groupId',async (req,res)=>{
   }
 });
 
-//그릅 삭제
+//그릅 삭제(수정 필요)
 app.delete('/api/groups/:groupId',async (req,res)=>{
+  const password = req.body.password;
   const groupId = req.params.groupId;
   const group = await Group.findByIdAndDelete(groupId);
 });
 
 //그룹 상세 정보 조회
-app.get('/api/groups/:groupId',(req,res)=>{
+app.get('/api/groups/:groupId',async (req,res)=>{
   const groupId = req.params.groupId;
-  
+  const group = await Group.findById(groupId);
+  res.status(200).json({
+    id: group._id,
+    name: group.name,
+    imageUrl: group.imageUrl,
+    isPublic: group.isPublic,
+    badges: group.badges,
+    postCount: group.postCount,
+    createdAt: group.createdAt,
+    introduction: group.introduction
+  })
 });
 
 //그룹 조회 권한 확인
-app.post('/api/groups/:groupId/verify-password',(req,res)=>{
-
+app.post('/api/groups/:groupId/verify-password',async(req,res)=>{
+  const groupId = req.params.groupId;
+  const password = req.body.password;
+  const group = await Group.findById(groupId);
+  if(password === group.password){
+    res.status(200).send({message:"비밀번호가 확인되었습니다"});
+  } else{}
 });
 
 //그룹 공감하기
