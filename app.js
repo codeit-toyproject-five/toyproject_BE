@@ -465,5 +465,81 @@ app.post('api/posts/:postId/like',async(req,res)=>{
   const 
 });
 */
+
+
+
+
+// 댓글 등록
+app.post('/api/posts/:postId/comments', async (req, res) => {
+  const { postId } = req.params;
+  const { nickname, content, password } = req.body;
+
+  if (!nickname || !content || !password) {
+    return res.status(400).json({ message: '잘못된 요청입니다' });
+  }
+
+  try {
+    const newComment = new Comment({
+      nickname,
+      content,
+      createdAt: new Date(),
+    });
+
+    await newComment.save();
+
+    return res.status(200).json({
+      id: newComment._id,
+      nickname: newComment.nickname,
+      content: newComment.content,
+      createdAt: newComment.createdAt,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: '서버 에러가 발생했습니다' });
+  }
+});
+
+// 댓글 목록 조회
+app.get('/api/posts/:postId/comments', async (req, res) => {
+  const { postId } = req.params;
+  const { commentId, page = 1, pageSize = 10} = req.query;
+
+
+  if (isNaN(page) || isNaN(pageSize) || page <= 0 || pageSize <= 0) {
+    return res.status(400).json({ message: '잘못된 요청입니다' });
+  }
+
+  try {
+    const filter = { postId };
+    if (commentId) {
+      filter._id = { $gt: commentId };
+    }
+
+    const totalItemCount = await Comment.countDocuments(filter);
+
+    const comments = await Comment.find(filter)
+        .sort({ _id: 1 })
+        .skip((page - 1) * pageSize)
+        .limit(parseInt(pageSize));
+
+    const totalPages = Math.ceil(totalItemCount / pageSize);
+
+    return res.status(200).json({
+      currentPage: parseInt(page),
+      totalPages,
+      totalItemCount,
+      data: comments.map(comment => ({
+        id: comment._id,
+        nickname: comment.nickname,
+        content: comment.content,
+        createdAt: comment.createdAt,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: '서버 에러가 발생했습니다' });
+  }
+});
+
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 app.listen(3000, () => console.log('Server Started'));
