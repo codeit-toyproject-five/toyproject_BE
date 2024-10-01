@@ -10,6 +10,20 @@ import swaggerJSDoc from 'swagger-jsdoc';
 const app = express();
 app.use(express.json());
 
+function asyncHandler(handler){
+  return async function (req,res){
+    try{
+      await handler(req,res);
+    }catch(e){
+      if(e.name === 'CastError'){
+        res.status(404).send({message: "존재하지 않습니다"});
+      } else{
+        res.status(400).send({message: "잘못된 요청입니다"});
+      }
+    }
+  }
+}
+
 // Swagger 설정
 const swaggerOptions = {
   swaggerDefinition: {
@@ -105,7 +119,7 @@ app.post('/api/groups',async(req,res)=>{
     isPublic,
     introduction,
   });
-  
+
   //DB에 데이터 저장
   const savedGroup = await newGroup.save();
 
@@ -197,14 +211,12 @@ app.get('/api/groups',async (req,res)=>{
 app.patch('/api/groups/:groupId',async (req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
-  if(!group){
-    return res.status(404).send({message: 'id없음'});
-  }
+
   if(group.password === req.body.password){
-    group.name = req.body.name || group.name;
-    group.imageUrl = req.body.imageUrl || group.imageUrl;
-    group.isPublic = Boolean(req.body.isPublic) || group.isPublic;
-    group.introduction = req.body.introduction || group.introduction;
+    group.name = req.body.name;
+    group.imageUrl = req.body.imageUrl;
+    group.isPublic = Boolean(req.body.isPublic);
+    group.introduction = req.body.introduction;
     await group.save();
     res.status(200).json({
       id: group._id,
@@ -218,31 +230,42 @@ app.patch('/api/groups/:groupId',async (req,res)=>{
       introduction: group.introduction
     });
   } else{
-    return res.status(403).send({message: "비번오류"});
+    return res.status(403).send({message: "비밀번호가 틀렸습니다"});
   }
 });
-/*
-//그릅 삭제(수정 필요)
+
+//그릅 삭제
 app.delete('/api/groups/:groupId',async (req,res)=>{
   const password = req.body.password;
   const groupId = req.params.groupId;
-  const group = await Group.findByIdAndDelete(groupId);
+  const group = await Group.findById(groupId);
+  if(password === undefined){
+    return res.status(400).send({message: "잘못된 요청입니다"});
+  }
+  if(password !== group.password){
+    return res.status(403).send({message: "비밀번호가 틀렸습니다"});
+  }
 });
-*/
+
 //그룹 상세 정보 조회
 app.get('/api/groups/:groupId',async (req,res)=>{
   const groupId = req.params.groupId;
-  const group = await Group.findById(groupId);
-  res.status(200).json({
-    id: group._id,
-    name: group.name,
-    imageUrl: group.imageUrl,
-    isPublic: group.isPublic,
-    badges: group.badges,
-    postCount: group.postCount,
-    createdAt: group.createdAt,
-    introduction: group.introduction
-  });
+  try{
+    const group = await Group.findById(groupId);
+
+    res.status(200).json({
+      id: group._id,
+      name: group.name,
+      imageUrl: group.imageUrl,
+      isPublic: group.isPublic,
+      badges: group.badges,
+      postCount: group.postCount,
+      createdAt: group.createdAt,
+      introduction: group.introduction
+    });
+  } catch(e){
+    res.status(400).send({message: "잘못된 요청입니다"})
+  }
 });
 
 //그룹 조회 권한 확인
@@ -251,12 +274,14 @@ app.post('/api/groups/:groupId/verify-password',async(req,res)=>{
   const password = req.body.password;
   const group = await Group.findById(groupId);
   if(password === group.password){
-    res.status(200).send({message:"비밀번호가 확인되었습니다"});
-  } else{}
+    return res.status(200).send({message:"비밀번호가 확인되었습니다"});
+  } else{
+    return res.status(401).send({message:"비밀번호가 틀렸습니다"})
+  }
 });
 
 //그룹 공감하기
-app.post('/api/groups/:groupId/like',async(req,res)=>{
+app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
   group.likeCount++;
@@ -265,7 +290,7 @@ app.post('/api/groups/:groupId/like',async(req,res)=>{
   }
   await group.save();
   res.status(200).send({message: "그룹 공감하기 성공"});
-});
+}));
 
 //그룹 공개 여부 확인
 app.get('api/groups/:groupId/is-public',async(req,res)=>{
@@ -276,23 +301,9 @@ app.get('api/groups/:groupId/is-public',async(req,res)=>{
     isPublic: group.isPublic,
   });
 });
-/*req.body
-{
-	"nickname": "string",
-	"title": "string",
-	"content": "string",
-	"postPassword": "string",
-	"groupPassword": "string",
-	"imageUrl": "string",
-	"tags": [ "string", "string" ],
-	"location": "string",
-	"moment": "2024-02-21",
-	"isPublic": true
-}
-*/
 
 //게시글 등록
-app.post('api/groups/:groupId/posts', async(req,res)=>{
+app.post('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const req_body=req.body;
   const post = new Post({
@@ -304,10 +315,10 @@ app.post('api/groups/:groupId/posts', async(req,res)=>{
   });
   const savedPost = await post.save();
   res.status(200).send(savedPost);
-});
+}));
 
 //게시글 조회
-app.get('api/groups/:groupId/posts', async(req,res)=>{
+app.get('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const page = Number(req.query.page) || 1;
   const pageSize = Number(req.query.pageSize) || 10;
@@ -370,13 +381,13 @@ app.get('api/groups/:groupId/posts', async(req,res)=>{
       createdAt: post.createdAt
     }))
   })
-});
+}));
 
 //게시글 수정
-app.patch('api/posts/:postId',async(req,res)=>{
+app.patch('api/posts/:postId',asyncHandler(async(req,res)=>{
   const req_body = req.body;
   const postId = req.params.postId;
-  const post = Post.findById(postId);
+  const post = await Post.findById(postId);
   const postPassword = req_body.postPassword;
 
   if(post.password !== postPassword){
@@ -408,38 +419,46 @@ app.patch('api/posts/:postId',async(req,res)=>{
     commentCount: newpost.commentCount,
     createdAt: newpost.createdAt
   })
-});
+}));
 
 //게시글 삭제
-app.delete('api/posts/:postId',async(req,res)=>{
+app.delete('api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   const postPassword = req.body.postPassword;
 
-  const post = Post.findByIdAndDelete(postId)
-  res.status(200).send({message:"게시글 삭제 성공"});
-});
+  const post = await Post.findById(postId);
+
+  if(post.postPassword !== postPassword){
+    return res.status(403).send({message: "비밀번호가 틀렸습니다"});
+  }
+  await Post.findByIdAndDelete(postId);
+  res.status(200).send({message: "게시글 삭제 성공"});
+}));
 
 //게시글 상세 정보 조회
 app.get('api/posts/:postId',async(req,res)=>{
   const postId = req.params.postId;
-  
-  const post = Post.findById(postId);
+  try{
+    const post = await Post.findById(postId);
 
-  res.status(200).json({
-    id: post._id,
-    groupId: post.groupId,
-    nickname: post.nickname,
-    title: post.title,
-    content: post.content,
-    imageUrl: post.imageUrl,
-    tags: post.tags,
-    location: post.location,
-    moment: post.moment,
-    isPublic: post.isPublic,
-    likeCount: post.likeCount,
-    commentCount: post.commentCount,
-    createdAt: post.createdAt
-  })
+    res.status(200).json({
+      id: post._id,
+      groupId: post.groupId,
+      nickname: post.nickname,
+      title: post.title,
+      content: post.content,
+      imageUrl: post.imageUrl,
+      tags: post.tags,
+      location: post.location,
+      moment: post.moment,
+      isPublic: post.isPublic,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      createdAt: post.createdAt
+    });
+  }catch(e){
+    res.status(400).send({message:"잘못된 요청입니다"});
+  }
 });
 
 //게시글 조회 권한 확인
@@ -447,7 +466,7 @@ app.post('api/posts/:postId/verify-password',async(req,res)=>{
   const postId = req.params.postId;
   const postPassword = req.body.password;
 
-  const post = Post.findById(postId);
+  const post = await Post.findById(postId);
 
   if(post.postPassword!==postPassword){
     return res.status(401).send({message: "비밀번호가 틀렸습니다"});
@@ -457,13 +476,30 @@ app.post('api/posts/:postId/verify-password',async(req,res)=>{
   }
 });
 
-/*
+
 //게시글 공감하기
 app.post('api/posts/:postId/like',async(req,res)=>{
   const postId = req.params.postId;
   
-  const 
+  const post = await Post.findById(postId);
+
+  post.likeCount++;
+
+  await post.save();
+
+  res.status(200).send({message:"게시글 공감하기 성공"});
 });
+
+app.get('api/posts/:postId/is-public',async(req,res)=>{
+  const postId = req.params.postId;
+  const post = await Post.findById(postId);
+
+  res.status(200).json({
+    id: post._id,
+    isPublic: post.isPublic,
+  });
+});
+<<<<<<< HEAD
 */
 
 
@@ -541,5 +577,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
   }
 });
 
+=======
+>>>>>>> 6c36458 (오류 처리 추가)
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 app.listen(3000, () => console.log('Server Started'));

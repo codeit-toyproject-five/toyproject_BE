@@ -4,12 +4,15 @@ const GroupSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      required: true
     },
     imageUrl:{
       type: String,
+      required: true,
     },
     isPublic:{
       type: Boolean,
+      required: true,
     },
     likeCount:{
       type: Number,
@@ -29,6 +32,7 @@ const GroupSchema = new mongoose.Schema(
     },
     introduction:{
       type: String,
+      required:true,
     },
     badgeCount:{
       type: Number,
@@ -36,6 +40,7 @@ const GroupSchema = new mongoose.Schema(
     },
     password:{
       type:String,
+      required: true,
     }
   }
 );

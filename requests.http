@@ -4,24 +4,30 @@ Content-Type: application/json
 {
   "name":"건아들",
   "password": "건아건아",
-  "imageUrl": "string",
-  "isPublic": false,
-  "introduction": "건아와 건아들"
+  "isPublic": false
 }
 
 ###
 
-GET http://localhost:3000/api/groups?page=1&pageSize=10&sortBy=mostBadge&isPublic=false
+GET http://localhost:3000/api/groups?page=1&pageSize=10&sortBy=mostBadge&isPublic=true
 
 ###
 
-PATCH http://localhost:3000/api/groups/66f2d4ecf995e15027d32547
+PATCH http://localhost:3000/api/groups/623
 Content-Type: application/json
 
 {
   "name": "Updated Group Name",
-  "password": "correctPassword",
+  "password": "건아건아",
   "imageUrl": "http://example.com/image.jpg",
   "isPublic": true,
   "introduction": "Updated group introduction."
 }
+
+###
+
+GET http://localhost:3000/api/groups/66f6c1612105bc
+
+###
+
+GET http://localhost:3000/api/posts/123412332131
