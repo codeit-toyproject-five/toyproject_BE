@@ -31,3 +31,11 @@ GET http://localhost:3000/api/groups/66f6c1612105bc
 ###
 
 GET http://localhost:3000/api/posts/123412332131
+
+###
+
+DELETE http://localhost:3000/api/groups/1234223
+
+###
+
+POST http://localhost:3000/api/groups/2312412/verify-password
