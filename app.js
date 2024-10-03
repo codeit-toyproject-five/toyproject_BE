@@ -12,10 +12,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const corsOptions = {
-  origin: ['http://localhost:3000', 'https://toyproject-be.onrender.com'],
-}
-app.use(cors(corsOptions));
+
+app.use(cors());
 app.use(express.json());
 const upload = multer({dest:'uploads/'});
 
@@ -931,11 +929,7 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
 /*
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 */
-mongoose.connect(process.env.DATABASE_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  tlsInsecure: true,   // tlsInsecure 사용
-}).then(() => {
+mongoose.connect(process.env.DATABASE_URL).then(() => {
   console.log('Connected to MongoDB');
 }).catch(err => {
   console.error('Error connecting to MongoDB:', err);
