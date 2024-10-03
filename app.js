@@ -12,9 +12,94 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://toyproject-be.onrender.com'],
+}
+app.use(cors(corsOptions));
 app.use(express.json());
 const upload = multer({dest:'uploads/'});
+
+// Swagger 설정
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Group API',
+      version: '1.0.0',
+      description: 'API documentation for Group management',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+      },
+    ],
+  },
+  apis: ['./app.js'], // 여기에 경로를 맞춰 Swagger 주석이 있는 파일을 지정
+};
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+/**
+ * @swagger
+ * /api/groups:
+ *   post:
+ *     summary: Register a new group
+ *     description: Creates a new group with the provided details
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the group
+ *                 example: Developer Group
+ *               password:
+ *                 type: string
+ *                 description: The password for the group
+ *                 example: securepassword
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL for the group's image
+ *                 example: http://example.com/image.jpg
+ *               isPublic:
+ *                 type: boolean
+ *                 description: Is the group public or private
+ *                 example: true
+ *               introduction:
+ *                 type: string
+ *                 description: A brief introduction of the group
+ *                 example: This is a group for developers
+ *     responses:
+ *       201:
+ *         description: Group successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the created group
+ *                 name:
+ *                   type: string
+ *                   description: The name of the group
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL for the group's image
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Is the group public or private
+ *                 introduction:
+ *                   type: string
+ *                   description: A brief introduction of the group
+ *       400:
+ *         description: Invalid request
+ */
 
 
 
