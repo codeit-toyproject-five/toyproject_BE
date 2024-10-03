@@ -846,5 +846,5 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
 /*
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 */
-mongoose.connect(process.env.DATABASE_URL);
-app.listen(3000, () => console.log('Server Started'));
+mongoose.connect(process.env.DATABASE_URL).then(()=>console.log('Connected to DB'));
+app.listen(process.env.PORT || 3000, () => console.log('Server Started'));
