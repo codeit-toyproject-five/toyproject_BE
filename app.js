@@ -512,12 +512,22 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
   }
 
   try {
+    // postId가 유효한지 확인 (게시물이 존재하는지)
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: '존재하지 않는 게시물입니다.' });
+    }
+
+    // 새로운 댓글 생성
     const newComment = new Comment({
+      postId, // postId를 참조하여 댓글과 게시물 연결
       nickname,
       content,
+      password,
       createdAt: new Date(),
     });
 
+    // 댓글 저장
     await newComment.save();
 
     return res.status(200).json({
@@ -535,22 +545,19 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
 // 댓글 목록 조회
 app.get('/api/posts/:postId/comments', async (req, res) => {
   const { postId } = req.params;
-  const { commentId, page = 1, pageSize = 10} = req.query;
-
+  const { page = 1, pageSize = 10 } = req.query;
 
   if (isNaN(page) || isNaN(pageSize) || page <= 0 || pageSize <= 0) {
     return res.status(400).json({ message: '잘못된 요청입니다' });
   }
 
   try {
+    // postId 필터링
     const filter = { postId };
-    if (commentId) {
-      filter._id = { $gt: commentId };
-    }
 
     const totalItemCount = await Comment.countDocuments(filter);
-
     const comments = await Comment.find(filter)
+        .populate('postId', 'title') // 게시물 제목도 함께 조회
         .sort({ _id: 1 })
         .skip((page - 1) * pageSize)
         .limit(parseInt(pageSize));
@@ -563,6 +570,7 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
       totalItemCount,
       data: comments.map(comment => ({
         id: comment._id,
+        postTitle: comment.postId.title, // 게시물 제목 추가
         nickname: comment.nickname,
         content: comment.content,
         createdAt: comment.createdAt,
@@ -654,24 +662,26 @@ app.delete('/api/comments/:commentId', async (req, res) => {
 // 이미지 업로드
 app.post('/api/image', upload.single('image'), async (req, res) => {
   try {
-    // 파일을 Base64로 인코딩
     const file = req.file;
-    const imgData = fs.readFileSync(file.path);
-    const encodedImage = imgData.toString('base64');
+
+    // 파일이 없는 경우 처리
+    if (!file) {
+      return res.status(400).json({ message: '이미지 파일이 필요합니다' });
+    }
+
+    // 저장된 이미지 파일의 경로 생성 (서버 기준으로)
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
 
     // 이미지 정보를 MongoDB에 저장
-    const newImage = new ImageModel({
-      image: encodedImage,
-      contentType: file.mimetype, // 파일의 MIME 타입 (image/png 등)
+    const newImage = new Image({
+      image: file.filename, // 실제 저장된 파일 이름을 저장
+      contentType: file.mimetype,
     });
 
     await newImage.save();
 
-    // 업로드된 파일 삭제
-    fs.unlinkSync(file.path);
-
-    // 성공 응답
-    res.status(200).json({ message: '이미지 저장 성공', imageId: newImage._id });
+    // 성공 응답으로 이미지 URL 반환
+    res.status(200).json({ imageUrl });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: '서버 에러' });
