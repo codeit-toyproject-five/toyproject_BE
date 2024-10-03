@@ -931,5 +931,15 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
 /*
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 */
-mongoose.connect(process.env.DATABASE_URL).then(()=>console.log('Connected to DB'));
+mongoose.connect(process.env.DATABASE_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  tlsInsecure: false,   // SSL 인증서 검사를 비활성화하는 옵션, 필요 시 사용
+  ssl: true,            // SSL을 사용하여 연결
+  tlsAllowInvalidCertificates: false, // 인증서 오류 무시 여부, false로 설정하여 인증서 유효성 검사
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch(err => {
+  console.error('Error connecting to MongoDB:', err);
+});
 app.listen(process.env.PORT || 3000, () => console.log('Server Started'));
