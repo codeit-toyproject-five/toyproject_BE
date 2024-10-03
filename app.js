@@ -688,5 +688,173 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/comments/{commentId}:
+ *   delete:
+ *     summary: Delete a comment
+ *     description: Deletes an existing comment
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the comment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The password to authorize the deletion
+ *                 example: securepassword
+ *     responses:
+ *       200:
+ *         description: Comment successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Comment deleted successfully
+ *       400:
+ *         description: Invalid request
+ *       403:
+ *         description: Incorrect password
+ *       404:
+ *         description: Comment not found
+ */
+
+
+/**
+ * @swagger
+ * /api/posts/{postId}/comments:
+ *   get:
+ *     summary: Get a list of comments
+ *     description: Retrieves a list of comments for a specific post
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           description: The page number to retrieve
+ *           example: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           description: The number of comments per page
+ *           example: 10
+ *     responses:
+ *       200:
+ *         description: List of comments retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentPage:
+ *                   type: integer
+ *                   description: The current page number
+ *                 totalPages:
+ *                   type: integer
+ *                   description: The total number of pages
+ *                 totalItemCount:
+ *                   type: integer
+ *                   description: The total number of comments
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: The ID of the comment
+ *                       nickname:
+ *                         type: string
+ *                         description: The nickname of the comment author
+ *                       content:
+ *                         type: string
+ *                         description: The content of the comment
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         description: The time the comment was created
+ *       400:
+ *         description: Invalid request
+ */
+
+/**
+ * @swagger
+ * /api/posts/{postId}/comments:
+ *   post:
+ *     summary: Register a new comment
+ *     description: Creates a new comment on a specific post
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nickname:
+ *                 type: string
+ *                 description: The nickname of the comment author
+ *                 example: john_doe
+ *               content:
+ *                 type: string
+ *                 description: The content of the comment
+ *                 example: This is a great post!
+ *               password:
+ *                 type: string
+ *                 description: The password for modifying or deleting the comment
+ *                 example: securepassword
+ *     responses:
+ *       200:
+ *         description: Comment successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the created comment
+ *                 nickname:
+ *                   type: string
+ *                   description: The nickname of the comment author
+ *                 content:
+ *                   type: string
+ *                   description: The content of the comment
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The time the comment was created
+ *       400:
+ *         description: Invalid request
+ */
+
+
+
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 app.listen(3000, () => console.log('Server Started'));
