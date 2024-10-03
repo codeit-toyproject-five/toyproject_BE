@@ -14,6 +14,7 @@ app.use(express.json());
 const upload = multer({dest:'uploads/'});
 
 
+
 function asyncHandler(handler){
   return async function (req,res){
     try{
@@ -145,8 +146,8 @@ app.post('/api/groups',asyncHandler(async(req,res)=>{
 //그룹 조회(/api/groups, GET)
 app.get('/api/groups',asyncHandler(async (req,res)=>{
   //req 쿼리를 변수에 매칭.
-  const page = Number(req.query.page);
-  const pageSize = Number(req.query.pageSize);
+  const page = Number(req.query.page) || 1;
+  const pageSize = Number(req.query.pageSize) || 10;
   const sortBy = req.query.sortBy;
   const keyword = req.query.keyword;
   const isPublic = req.query.isPublic;
@@ -211,11 +212,13 @@ app.get('/api/groups',asyncHandler(async (req,res)=>{
   })
 }));
 
-//그룹 정보 수정
+//그룹 수정
 app.patch('/api/groups/:groupId',asyncHandler(async (req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
-
+  if(!group){
+    return res.status(404).send({message : "존재하지 않습니다"});
+  }
   if(group.password === req.body.password){
     group.name = req.body.name;
     group.imageUrl = req.body.imageUrl;
@@ -238,23 +241,26 @@ app.patch('/api/groups/:groupId',asyncHandler(async (req,res)=>{
   }
 }));
 
-//그릅 삭제
+//그룹 삭제
 app.delete('/api/groups/:groupId',asyncHandler(async (req,res)=>{
   const password = req.body.password;
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
-  if(password === undefined){
-    return res.status(400).send({message: "잘못된 요청입니다"});
+  if(!group){
+    return res.status(404).send({message: "존재하지 않습니다"});
   }
   if(password !== group.password){
     return res.status(403).send({message: "비밀번호가 틀렸습니다"});
   }
+  await Group.findByIdAndDelete(groupId);
+  res.status(200).send({message: "그룹 삭제 성공"});
 }));
 
 //그룹 상세 정보 조회
 app.get('/api/groups/:groupId',async (req,res)=>{
-  const groupId = req.params.groupId;
   try{
+    const groupId = req.params.groupId;
+
     const group = await Group.findById(groupId);
 
     res.status(200).json({
@@ -262,13 +268,14 @@ app.get('/api/groups/:groupId',async (req,res)=>{
       name: group.name,
       imageUrl: group.imageUrl,
       isPublic: group.isPublic,
+      likeCount: group.likeCount,
       badges: group.badges,
       postCount: group.postCount,
       createdAt: group.createdAt,
       introduction: group.introduction
     });
-  } catch(e){
-    res.status(400).send({message: "잘못된 요청입니다"})
+  }catch(e){
+    res.status(400).send({message:"잘못된 요청입니다"});
   }
 });
 
@@ -280,7 +287,7 @@ app.post('/api/groups/:groupId/verify-password',asyncHandler(async(req,res)=>{
   if(password === group.password){
     return res.status(200).send({message:"비밀번호가 확인되었습니다"});
   } else{
-    return res.status(401).send({message:"비밀번호가 틀렸습니다"})
+    return res.status(401).send({message:"비밀번호가 틀렸습니다"});
   }
 }));
 
@@ -288,6 +295,9 @@ app.post('/api/groups/:groupId/verify-password',asyncHandler(async(req,res)=>{
 app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
+  if(!group){
+    return res.status(404).send({message: "존재하지 않습니다"});
+  }
   group.likeCount++;
   if(group.likeCount>=10000){
     group.badges.push("그룹 공간 1만 개 이상 받기");
@@ -297,32 +307,56 @@ app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
 }));
 
 //그룹 공개 여부 확인
-app.get('api/groups/:groupId/is-public',asyncHandler(async(req,res)=>{
+app.get('/api/groups/:groupId/is-public',asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const group = await Group.findById(groupId);
   res.status(200).json({
     id: group._id,
-    isPublic: group.isPublic,
+    isPublic: Boolean(group.isPublic)
   });
 }));
 
 //게시글 등록
-app.post('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
+app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
-  const req_body=req.body;
+  const {nickname, title, content, postPassword, groupPassword,imageUrl, tags, location, moment, isPublic}=req.body;
   const post = new Post({
     groupId: groupId,
-    ...req_body,
+    nickname,
+    title,
+    content,
+    postPassword,
+    groupPassword,
+    imageUrl,
+    tags,
+    location,
+    moment,
+    isPublic,
     likeCount:0,
     commentCount: 0,
     createdAt: Date.now(),
   });
   const savedPost = await post.save();
-  res.status(200).send(savedPost);
+  res.status(200).send({
+    id: savedPost._id,
+    groupId: savedPost.groupId,
+    nickname: savedPost.nickname,
+    title: savedPost.title,
+    content: savedPost.content,
+    imageUrl: savedPost.imageUrl,
+    tags: savedPost.tags,
+    location: savedPost.location,
+    moment: savedPost.moment,
+    isPublic: savedPost.isPublic,
+    likeCount: savedPost.likeCount,
+    commentCount: savedPost.commentCount,
+    createdAt: savedPost.createdAt
+  });
 }));
 
 //게시글 조회
-app.get('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
+app.get('/api/groups/:groupId/posts', async(req,res)=>{
+  try{
   const groupId = req.params.groupId;
   const page = Number(req.query.page) || 1;
   const pageSize = Number(req.query.pageSize) || 10;
@@ -330,6 +364,9 @@ app.get('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const keyword = req.query.keyword;
   const isPublic = req.query.isPublic;
 
+  //groupId유효성 검사
+  await Group.findById(groupId);
+  
   const filter = {};
 
   //filter
@@ -385,10 +422,13 @@ app.get('api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
       createdAt: post.createdAt
     }))
   })
-}));
+  }catch(e){
+    return res.status(400).send({message: "잘못된 요청입니다"});
+  }
+});
 
 //게시글 수정
-app.patch('api/posts/:postId',asyncHandler(async(req,res)=>{
+app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const req_body = req.body;
   const postId = req.params.postId;
   const post = await Post.findById(postId);
@@ -426,7 +466,7 @@ app.patch('api/posts/:postId',asyncHandler(async(req,res)=>{
 }));
 
 //게시글 삭제
-app.delete('api/posts/:postId',asyncHandler(async(req,res)=>{
+app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   const postPassword = req.body.postPassword;
 
@@ -462,7 +502,7 @@ app.get('api/posts/:postId',asyncHandler(async(req,res)=>{
 }));
 
 //게시글 조회 권한 확인
-app.post('api/posts/:postId/verify-password',async(req,res)=>{
+app.post('/api/posts/:postId/verify-password',async(req,res)=>{
   const postId = req.params.postId;
   const postPassword = req.body.password;
 
@@ -478,12 +518,18 @@ app.post('api/posts/:postId/verify-password',async(req,res)=>{
 
 
 //게시글 공감하기
-app.post('api/posts/:postId/like',asyncHandler(async(req,res)=>{
+app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   
   const post = await Post.findById(postId);
 
-  post.likeCount++;
+  const likeCount = post.likeCount++;
+
+  if(likeCount=10000){
+    const group = await Group.findById(post.groupId);
+    group.badges.push("추억 공감 1만 개 이상 받기");
+    await group.save();
+  }
 
   await post.save();
 
@@ -491,7 +537,7 @@ app.post('api/posts/:postId/like',asyncHandler(async(req,res)=>{
 }));
 
 //게시글 공개 여부 확인
-app.get('api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
+app.get('/api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   const post = await Post.findById(postId);
 

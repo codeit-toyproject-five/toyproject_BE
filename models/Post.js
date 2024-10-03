@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const PostSchema = new mongoose.Schema(
   {
     groupId:{
-      type: Number,
+      type: String,
+      required: true,
     },
     nickname:{
       type: String,
@@ -16,6 +17,10 @@ const PostSchema = new mongoose.Schema(
     postPassword:{
       type: String,
       required: true,
+    },
+    groupPassword:{
+      type: String,
+      required:true,
     },
     content:{
       type: String,
