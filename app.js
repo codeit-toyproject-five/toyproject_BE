@@ -1,6 +1,5 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import {DATABASE_URL} from './env.js';
 import Group from './models/Group.js';
 import Post from './models/Post.js';
 import Image from './models/Image.js';
