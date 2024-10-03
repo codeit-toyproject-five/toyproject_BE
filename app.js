@@ -299,7 +299,7 @@ app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
     return res.status(404).send({message: "존재하지 않습니다"});
   }
   group.likeCount++;
-  if(group.likeCount>=10000){
+  if(group.likeCount=10000){
     group.badges.push("그룹 공간 1만 개 이상 받기");
   }
   await group.save();
@@ -319,6 +319,7 @@ app.get('/api/groups/:groupId/is-public',asyncHandler(async(req,res)=>{
 //게시글 등록
 app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
+  const group = Group.findById(groupId);
   const {nickname, title, content, postPassword, groupPassword,imageUrl, tags, location, moment, isPublic}=req.body;
   const post = new Post({
     groupId: groupId,
@@ -337,6 +338,8 @@ app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
     createdAt: Date.now(),
   });
   const savedPost = await post.save();
+  group.postCount++;
+  group.save();
   res.status(200).send({
     id: savedPost._id,
     groupId: savedPost.groupId,
@@ -433,18 +436,24 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   const post = await Post.findById(postId);
   const postPassword = req_body.postPassword;
-
-  if(post.password !== postPassword){
-    return res.status(403).send({message:"비밀번호가 틀렸습니다"});
+  if(!post){
+    return res.status(404).send({message: "존재하지 않습니다"});
   }
+
   post.nickname = req_body.nickname;
   post.title = req_body.title;
   post.content = req_body.content;
   post.imageUrl = req_body.imageUrl;
   post.tags = req_body.tags;
   post.location = req_body.location;
-  post.moment = req_body.mement;
+  post.moment = req_body.moment;
   post.isPublic = req_body.isPublic;
+
+  if(post.postPassword !== postPassword){
+    console.log(post.postPassword);
+    console.log(postPassword);
+    return res.status(403).send({message:"비밀번호가 틀렸습니다"});
+  }
 
   const newpost = await post.save();
 
@@ -468,19 +477,24 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
 //게시글 삭제
 app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
-  const postPassword = req.body.postPassword;
-
+  const postPassword = req.body.password;
   const post = await Post.findById(postId);
-
+  const group = await Group.findById(post.groupId);
+  if(!post){
+    return res.status(404).send({message: "존재하지 않습니다"});
+  }
   if(post.postPassword !== postPassword){
     return res.status(403).send({message: "비밀번호가 틀렸습니다"});
   }
   await Post.findByIdAndDelete(postId);
+  group.postCount--;
+  group.save();
   res.status(200).send({message: "게시글 삭제 성공"});
 }));
 
 //게시글 상세 정보 조회
-app.get('api/posts/:postId',asyncHandler(async(req,res)=>{
+app.get('api/posts/:postId',async(req,res)=>{
+  try{
   const postId = req.params.postId;
   const post = await Post.findById(postId);
 
@@ -499,7 +513,10 @@ app.get('api/posts/:postId',asyncHandler(async(req,res)=>{
     commentCount: post.commentCount,
     createdAt: post.createdAt
   });
-}));
+  }catch(e){
+    res.status(400).send({message:"잘못된 요청입니다"});
+  }
+});
 
 //게시글 조회 권한 확인
 app.post('/api/posts/:postId/verify-password',async(req,res)=>{
@@ -507,7 +524,7 @@ app.post('/api/posts/:postId/verify-password',async(req,res)=>{
   const postPassword = req.body.password;
 
   const post = await Post.findById(postId);
-
+  
   if(post.postPassword!==postPassword){
     return res.status(401).send({message: "비밀번호가 틀렸습니다"});
   }
@@ -522,10 +539,13 @@ app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   
   const post = await Post.findById(postId);
+  if(!post){
+    return res.status.send({message: "존재하지 않습니다"});
+  }
+  post.likeCount++;
+  const likeCount = post.likeCount;
 
-  const likeCount = post.likeCount++;
-
-  if(likeCount=10000){
+  if(likeCount===10000){
     const group = await Group.findById(post.groupId);
     group.badges.push("추억 공감 1만 개 이상 받기");
     await group.save();
