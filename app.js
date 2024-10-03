@@ -3,12 +3,16 @@ import mongoose from 'mongoose';
 import {DATABASE_URL} from './env.js';
 import Group from './models/Group.js';
 import Post from './models/Post.js';
+import Image from './models/Image.js';
 import Comment from './models/Comment.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
+import multer from 'multer';
 
 const app = express();
 app.use(express.json());
+const upload = multer({dest:'uploads/'});
+
 
 function asyncHandler(handler){
   return async function (req,res){
@@ -570,6 +574,109 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
   }
 });
 
+// 댓글 수정
+app.put('/api/comments/:commentId', async (req, res) => {
+  const { commentId } = req.params;
+  const { nickname, content, password } = req.body;
+
+  if (!nickname || !content || !password) {
+    return res.status(400).json({ message: '잘못된 요청입니다' });
+  }
+
+  try {
+    const comment = await Comment.findById(commentId);
+
+    // 댓글이 존재하지 않으면 404 응답
+    if (!comment) {
+      return res.status(404).json({ message: '존재하지 않습니다' });
+    }
+
+    // 비밀번호가 틀리면 403 응답
+    if (comment.password !== password) {
+      return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
+    }
+
+    // 댓글 내용을 수정
+    comment.nickname = nickname;
+    comment.content = content;
+
+    // 수정된 댓글을 저장
+    await comment.save();
+
+    // 성공 응답
+    return res.status(200).json({
+      id: comment._id,
+      nickname: comment.nickname,
+      content: comment.content,
+      createdAt: comment.createdAt,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: '서버 에러가 발생했습니다' });
+  }
+});
+
+// 댓글 삭제
+app.delete('/api/comments/:commentId', async (req, res) => {
+  const { commentId } = req.params;
+  const { password } = req.body;
+
+  // 요청 유효성 검사
+  if (!password) {
+    return res.status(400).json({ message: '잘못된 요청입니다' });
+  }
+
+  try {
+    // 해당 댓글을 DB에서 찾음
+    const comment = await Comment.findById(commentId);
+
+    // 댓글이 존재하지 않으면 404 응답
+    if (!comment) {
+      return res.status(404).json({ message: '존재하지 않습니다' });
+    }
+
+    // 비밀번호가 틀리면 403 응답
+    if (comment.password !== password) {
+      return res.status(403).json({ message: '비밀번호가 틀렸습니다' });
+    }
+
+    // 댓글 삭제
+    await comment.deleteOne();
+
+    // 성공 응답
+    return res.status(200).json({ message: '답글 삭제 성공' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: '서버 에러가 발생했습니다' });
+  }
+});
+
+// 이미지 업로드
+app.post('/api/image', upload.single('image'), async (req, res) => {
+  try {
+    // 파일을 Base64로 인코딩
+    const file = req.file;
+    const imgData = fs.readFileSync(file.path);
+    const encodedImage = imgData.toString('base64');
+
+    // 이미지 정보를 MongoDB에 저장
+    const newImage = new ImageModel({
+      image: encodedImage,
+      contentType: file.mimetype, // 파일의 MIME 타입 (image/png 등)
+    });
+
+    await newImage.save();
+
+    // 업로드된 파일 삭제
+    fs.unlinkSync(file.path);
+
+    // 성공 응답
+    res.status(200).json({ message: '이미지 저장 성공', imageId: newImage._id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 에러' });
+  }
+});
 
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 app.listen(3000, () => console.log('Server Started'));
