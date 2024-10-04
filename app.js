@@ -1359,7 +1359,7 @@ app.get('/api/groups/:groupId',async (req,res)=>{
     const group = await Group.findById(groupId);
 
     res.status(200).json({
-      id: group._id,
+      id: Number(group._id),
       name: group.name,
       imageUrl: group.imageUrl,
       isPublic: group.isPublic,
