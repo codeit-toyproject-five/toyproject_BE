@@ -100,6 +100,1096 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 
 
+/**
+ * @swagger
+ * /api/groups:
+ *   get:
+ *     summary: Retrieve a list of groups
+ *     description: Returns a paginated list of groups with filtering and sorting options.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: The current page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [latest, mostPosted, mostLiked, mostBadge]
+ *           example: latest
+ *         description: Sorting criteria
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *           example: "developer"
+ *         description: Search keyword
+ *       - in: query
+ *         name: isPublic
+ *         schema:
+ *           type: boolean
+ *           example: true
+ *         description: Whether the group is public or private
+ *     responses:
+ *       200:
+ *         description: Group list retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Current page number
+ *                   example: 1
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages
+ *                   example: 5
+ *                 totalItemCount:
+ *                   type: integer
+ *                   description: Total number of items
+ *                   example: 50
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: Group ID
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         description: Group name
+ *                         example: "string"
+ *                       imageUrl:
+ *                         type: string
+ *                         description: Group image URL
+ *                         example: "http://example.com/image.jpg"
+ *                       isPublic:
+ *                         type: boolean
+ *                         description: Whether the group is public or private
+ *                         example: true
+ *                       likeCount:
+ *                         type: integer
+ *                         description: Number of likes
+ *                         example: 0
+ *                       badgeCount:
+ *                         type: integer
+ *                         description: Number of badges
+ *                         example: 0
+ *                       postCount:
+ *                         type: integer
+ *                         description: Number of posts in the group
+ *                         example: 0
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Group creation date
+ *                         example: "2024-02-22T07:47:49.803Z"
+ *                       introduction:
+ *                         type: string
+ *                         description: Brief introduction of the group
+ *                         example: "This is a group for developers"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   patch:
+ *     summary: Update group details
+ *     description: Updates the details of a group based on the provided group ID and request body.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the group to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the group
+ *                 example: "Developer Group"
+ *               password:
+ *                 type: string
+ *                 description: The password for the group
+ *                 example: "securepassword"
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL for the group's image
+ *                 example: "http://example.com/image.jpg"
+ *               isPublic:
+ *                 type: boolean
+ *                 description: Is the group public or private
+ *                 example: true
+ *               introduction:
+ *                 type: string
+ *                 description: A brief introduction of the group
+ *                 example: "This is a group for developers"
+ *     responses:
+ *       200:
+ *         description: Group successfully updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Group ID
+ *                   example: "123"
+ *                 name:
+ *                   type: string
+ *                   description: Group name
+ *                   example: "string"
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL for the group's image
+ *                   example: "http://example.com/image.jpg"
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the group is public or private
+ *                   example: true
+ *                 likeCount:
+ *                   type: integer
+ *                   description: Number of likes
+ *                   example: 0
+ *                 badges:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of badges
+ *                   example: ["badge1", "badge2"]
+ *                 postCount:
+ *                   type: integer
+ *                   description: Number of posts in the group
+ *                   example: 0
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Group creation date
+ *                   example: "2024-02-22T07:47:49.803Z"
+ *                 introduction:
+ *                   type: string
+ *                   description: Brief introduction of the group
+ *                   example: "string"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       403:
+ *         description: Forbidden - Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "비밀번호가 틀렸습니다"
+ *       404:
+ *         description: Not Found - Group does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않습니다"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}:
+ *   delete:
+ *     summary: Delete a group
+ *     description: Deletes a group based on the provided group ID and password.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the group to delete
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The password to authenticate the group deletion
+ *                 example: "string"
+ *     responses:
+ *       200:
+ *         description: Group successfully deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "그룹 삭제 성공"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       403:
+ *         description: Forbidden - Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "비밀번호가 틀렸습니다"
+ *       404:
+ *         description: Not Found - Group does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않습니다"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/verify-password:
+ *   post:
+ *     summary: Verify group password
+ *     description: Verifies the password for a specific group by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to verify the password for
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The password to verify
+ *                 example: "string"
+ *     responses:
+ *       200:
+ *         description: Password verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "비밀번호가 확인되었습니다"
+ *       401:
+ *         description: Unauthorized - Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "비밀번호가 틀렸습니다"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/like:
+ *   post:
+ *     summary: Like a group
+ *     description: Adds a like or an appreciation to a specific group by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to like
+ *     responses:
+ *       200:
+ *         description: Group liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "그룹 공감하기 성공"
+ *       404:
+ *         description: Not Found - The group does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "존재하지 않습니다"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/is-public:
+ *   get:
+ *     summary: Get group public status
+ *     description: Retrieves whether a group is public or private by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to check the public status for
+ *     responses:
+ *       200:
+ *         description: Group public status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Group ID
+ *                   example: "123"
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the group is public or private
+ *                   example: true
+ *       404:
+ *         description: Not Found - The group does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "존재하지 않습니다"
+ */
+
+/**
+ * @swagger
+ * /api/groups/{groupId}/posts:
+ *   post:
+ *     summary: Create a new post in a group
+ *     description: Creates a new post within the specified group, requiring both post and group passwords for validation.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group where the post is created
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nickname:
+ *                 type: string
+ *                 description: The nickname of the post author
+ *                 example: "string"
+ *               title:
+ *                 type: string
+ *                 description: The title of the post
+ *                 example: "string"
+ *               content:
+ *                 type: string
+ *                 description: The content of the post
+ *                 example: "string"
+ *               postPassword:
+ *                 type: string
+ *                 description: Password to protect the post
+ *                 example: "string"
+ *               groupPassword:
+ *                 type: string
+ *                 description: Password to authenticate the group
+ *                 example: "string"
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL of the post's image
+ *                 example: "http://example.com/image.jpg"
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of tags associated with the post
+ *                 example: ["tag1", "tag2"]
+ *               location:
+ *                 type: string
+ *                 description: The location associated with the post
+ *                 example: "Seoul"
+ *               moment:
+ *                 type: string
+ *                 format: date
+ *                 description: The date related to the post's content
+ *                 example: "2024-02-21"
+ *               isPublic:
+ *                 type: boolean
+ *                 description: Whether the post is public or private
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Post created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the created post
+ *                   example: "123"
+ *                 groupId:
+ *                   type: string
+ *                   description: The ID of the group where the post was created
+ *                   example: "123"
+ *                 nickname:
+ *                   type: string
+ *                   description: The nickname of the post author
+ *                 title:
+ *                   type: string
+ *                   description: The title of the post
+ *                 content:
+ *                   type: string
+ *                   description: The content of the post
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL of the post's image
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of tags associated with the post
+ *                 location:
+ *                   type: string
+ *                   description: The location associated with the post
+ *                 moment:
+ *                   type: string
+ *                   format: date
+ *                   description: The date related to the post's content
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the post is public or private
+ *                 likeCount:
+ *                   type: integer
+ *                   description: The number of likes the post has received
+ *                   example: 0
+ *                 commentCount:
+ *                   type: integer
+ *                   description: The number of comments on the post
+ *                   example: 0
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The date and time when the post was created
+ *                   example: "2024-02-22T07:47:49.803Z"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "잘못된 요청입니다"
+ */
+/**
+ * @swagger
+ * /api/groups/{groupId}/posts:
+ *   get:
+ *     summary: Get a list of posts in a group
+ *     description: Retrieves a paginated list of posts within the specified group, with filtering and sorting options.
+ *     parameters:
+ *       - in: path
+ *         name: groupId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the group to retrieve posts from
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: The current page number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [latest, mostCommented, mostLiked]
+ *           example: latest
+ *         description: Sorting criteria
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *           example: "developer"
+ *         description: Search keyword
+ *       - in: query
+ *         name: isPublic
+ *         schema:
+ *           type: boolean
+ *           example: true
+ *         description: Whether to filter posts by their public/private status
+ *     responses:
+ *       200:
+ *         description: Post list retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Current page number
+ *                   example: 1
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Total number of pages
+ *                   example: 5
+ *                 totalItemCount:
+ *                   type: integer
+ *                   description: Total number of posts
+ *                   example: 50
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         description: Post ID
+ *                         example: "1"
+ *                       nickname:
+ *                         type: string
+ *                         description: The nickname of the post author
+ *                         example: "string"
+ *                       title:
+ *                         type: string
+ *                         description: The title of the post
+ *                         example: "string"
+ *                       imageUrl:
+ *                         type: string
+ *                         description: URL of the post's image
+ *                         example: "http://example.com/image.jpg"
+ *                       tags:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: List of tags associated with the post
+ *                         example: ["tag1", "tag2"]
+ *                       location:
+ *                         type: string
+ *                         description: The location associated with the post
+ *                         example: "Seoul"
+ *                       moment:
+ *                         type: string
+ *                         format: date
+ *                         description: The date related to the post's content
+ *                         example: "2024-02-21"
+ *                       isPublic:
+ *                         type: boolean
+ *                         description: Whether the post is public or private
+ *                         example: true
+ *                       likeCount:
+ *                         type: integer
+ *                         description: The number of likes the post has received
+ *                         example: 0
+ *                       commentCount:
+ *                         type: integer
+ *                         description: The number of comments on the post
+ *                         example: 0
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         description: The date and time when the post was created
+ *                         example: "2024-02-22T07:47:49.803Z"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ */
+
+/**
+ * @swagger
+ * /api/posts/{postId}:
+ *   patch:
+ *     summary: Update a post
+ *     description: Updates a specific post by its ID. A post password is required for authentication.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nickname:
+ *                 type: string
+ *                 description: The nickname of the post author
+ *                 example: "string"
+ *               title:
+ *                 type: string
+ *                 description: The title of the post
+ *                 example: "string"
+ *               content:
+ *                 type: string
+ *                 description: The content of the post
+ *                 example: "string"
+ *               postPassword:
+ *                 type: string
+ *                 description: Password to authenticate the post update
+ *                 example: "string"
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL of the post's image
+ *                 example: "http://example.com/image.jpg"
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of tags associated with the post
+ *                 example: ["tag1", "tag2"]
+ *               location:
+ *                 type: string
+ *                 description: The location associated with the post
+ *                 example: "Seoul"
+ *               moment:
+ *                 type: string
+ *                 format: date
+ *                 description: The date related to the post's content
+ *                 example: "2024-02-21"
+ *               isPublic:
+ *                 type: boolean
+ *                 description: Whether the post is public or private
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the updated post
+ *                   example: "123"
+ *                 groupId:
+ *                   type: string
+ *                   description: The ID of the group the post belongs to
+ *                   example: "123"
+ *                 nickname:
+ *                   type: string
+ *                   description: The nickname of the post author
+ *                   example: "string"
+ *                 title:
+ *                   type: string
+ *                   description: The title of the post
+ *                 content:
+ *                   type: string
+ *                   description: The content of the post
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL of the post's image
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of tags associated with the post
+ *                 location:
+ *                   type: string
+ *                   description: The location associated with the post
+ *                 moment:
+ *                   type: string
+ *                   format: date
+ *                   description: The date related to the post's content
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the post is public or private
+ *                 likeCount:
+ *                   type: integer
+ *                   description: The number of likes the post has received
+ *                   example: 0
+ *                 commentCount:
+ *                   type: integer
+ *                   description: The number of comments on the post
+ *                   example: 0
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The date and time when the post was created
+ *                   example: "2024-02-22T07:47:49.803Z"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       403:
+ *         description: Forbidden - Incorrect post password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "비밀번호가 틀렸습니다"
+ *       404:
+ *         description: Not Found - Post does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않습니다"
+ */
+/**
+ * @swagger
+ * /api/posts/{postId}:
+ *   delete:
+ *     summary: Delete a post
+ *     description: Deletes a specific post by its ID. A post password is required for authentication.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to delete
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               postPassword:
+ *                 type: string
+ *                 description: Password to authenticate the post deletion
+ *                 example: "string"
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "게시글 삭제 성공"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       403:
+ *         description: Forbidden - Incorrect post password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "비밀번호가 틀렸습니다"
+ *       404:
+ *         description: Not Found - Post does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않습니다"
+ */
+/**
+ * @swagger
+ * /api/posts/{postId}:
+ *   get:
+ *     summary: Get post details
+ *     description: Retrieves detailed information about a specific post by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to retrieve
+ *     responses:
+ *       200:
+ *         description: Post details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the post
+ *                   example: "123"
+ *                 groupId:
+ *                   type: string
+ *                   description: The ID of the group the post belongs to
+ *                   example: "123"
+ *                 nickname:
+ *                   type: string
+ *                   description: The nickname of the post author
+ *                   example: "string"
+ *                 title:
+ *                   type: string
+ *                   description: The title of the post
+ *                   example: "string"
+ *                 content:
+ *                   type: string
+ *                   description: The content of the post
+ *                 imageUrl:
+ *                   type: string
+ *                   description: URL of the post's image
+ *                 tags:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of tags associated with the post
+ *                 location:
+ *                   type: string
+ *                   description: The location associated with the post
+ *                 moment:
+ *                   type: string
+ *                   format: date
+ *                   description: The date related to the post's content
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the post is public or private
+ *                 likeCount:
+ *                   type: integer
+ *                   description: The number of likes the post has received
+ *                   example: 0
+ *                 commentCount:
+ *                   type: integer
+ *                   description: The number of comments on the post
+ *                   example: 0
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: The date and time when the post was created
+ *                   example: "2024-02-22T07:47:49.803Z"
+ *       400:
+ *         description: Bad Request - Invalid request format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ */
+/**
+ * @swagger
+ * /api/posts/{postId}/verify-password:
+ *   post:
+ *     summary: Verify post password
+ *     description: Verifies the password for a specific post by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to verify the password for
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The password to verify
+ *                 example: "string"
+ *     responses:
+ *       200:
+ *         description: Password verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "비밀번호가 확인되었습니다"
+ *       401:
+ *         description: Unauthorized - Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "비밀번호가 틀렸습니다"
+ */
+/**
+ * @swagger
+ * /api/posts/{postId}/like:
+ *   post:
+ *     summary: Like a post
+ *     description: Adds a like or an appreciation to a specific post by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to like
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "게시글 공감하기 성공"
+ *       404:
+ *         description: Not Found - The post does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message
+ *                   example: "존재하지 않습니다"
+ */
+/**
+ * @swagger
+ * /api/posts/{postId}/is-public:
+ *   get:
+ *     summary: Get post public status
+ *     description: Retrieves whether a post is public or private by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the post to check the public status for
+ *     responses:
+ *       200:
+ *         description: Post public status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: Post ID
+ *                   example: "123"
+ *                 isPublic:
+ *                   type: boolean
+ *                   description: Whether the post is public or private
+ *                   example: true
+ */
+
 
 function asyncHandler(handler){
   return async function (req,res){
