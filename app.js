@@ -16,6 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
 const upload = multer({dest:'uploads/'});
 
 // Swagger 설정
@@ -1361,7 +1362,7 @@ app.get('/api/groups/:groupId',async (req,res)=>{
     const group = await Group.findById(groupId);
 
     res.status(200).json({
-      id: Number(group._id),
+      id: group._id,
       name: group.name,
       imageUrl: group.imageUrl,
       isPublic: group.isPublic,
