@@ -1397,8 +1397,8 @@ app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
     return res.status(404).send({message: "존재하지 않습니다"});
   }
   group.likeCount++;
-  if(group.likeCount=10000){
-    group.badges.push("그룹 공간 1만 개 이상 받기");
+  if(group.likeCount===10000){
+    group.badges.push("그룹 공감 1만 개 이상 받기");
   }
   await group.save();
   res.status(200).send({message: "그룹 공감하기 성공"});
