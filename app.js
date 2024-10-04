@@ -1348,6 +1348,7 @@ app.delete('/api/groups/:groupId',asyncHandler(async (req,res)=>{
     return res.status(403).send({message: "비밀번호가 틀렸습니다"});
   }
   await Group.findByIdAndDelete(groupId);
+  const posts = Post.find(groupId===groupId);
   res.status(200).send({message: "그룹 삭제 성공"});
 }));
 
@@ -1837,6 +1838,7 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
     const newImage = new Image({
       image: file.filename, // 실제 저장된 파일 이름을 저장
       contentType: file.mimetype,
+      imageUrl: imageUrl,
     });
 
     await newImage.save();

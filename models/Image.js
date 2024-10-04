@@ -9,6 +9,10 @@ const ImageSchema = new mongoose.Schema({
         type: String,
         required: true
     }, // 이미지의 Content-Type (예: 'image/png')
+    imageurl: {
+      type: String,
+      required: true
+    }
 });
 
 const Image = mongoose.model('Image', ImageSchema);
