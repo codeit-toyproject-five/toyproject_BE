@@ -1321,17 +1321,17 @@ app.patch('/api/groups/:groupId',asyncHandler(async (req,res)=>{
     group.imageUrl = req.body.imageUrl;
     group.isPublic = Boolean(req.body.isPublic);
     group.introduction = req.body.introduction;
-    await group.save();
+    const newgroup = await group.save();
     res.status(200).json({
-      id: group._id,
-      name: group.name,
-      imageUrl: group.imageUrl,
-      isPublic: group.isPublic,
-      likeCount: group.likeCount,
-      badges: group.badges,
-      postCount: group.postCount,
-      createdAt: group.createdAt,
-      introduction: group.introduction
+      id: newgroup._id,
+      name: newgroup.name,
+      imageUrl: newgroup.imageUrl,
+      isPublic: newgroup.isPublic,
+      likeCount: newgroup.likeCount,
+      badges: newgroup.badges,
+      postCount: newgroup.postCount,
+      createdAt: newgroup.createdAt,
+      introduction: newgroup.introduction
     });
   } else{
     return res.status(403).send({message: "비밀번호가 틀렸습니다"});
@@ -1399,6 +1399,7 @@ app.post('/api/groups/:groupId/like',asyncHandler(async(req,res)=>{
   group.likeCount++;
   if(group.likeCount===10000){
     group.badges.push("그룹 공감 1만 개 이상 받기");
+    group.badgeCount++;
   }
   await group.save();
   res.status(200).send({message: "그룹 공감하기 성공"});
@@ -1646,6 +1647,7 @@ app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
   if(likeCount===10000){
     const group = await Group.findById(post.groupId);
     group.badges.push("추억 공감 1만 개 이상 받기");
+    group.badgeCount++;
     await group.save();
   }
 
@@ -1658,6 +1660,9 @@ app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
 app.get('/api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   const post = await Post.findById(postId);
+  if(!post){
+    return res.status(404).send({message: "존재하지 않습니다"});
+  }
 
   res.status(200).json({
     id: post._id,

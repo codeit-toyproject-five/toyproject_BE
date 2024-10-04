@@ -41,12 +41,15 @@ Content-Type: application/json
 ###
 
 //그룹 수정(403 Forbidden)
-PATCH http://localhost:3000/api/groups/66f2d4c8f995e15027d32545
+PATCH http://localhost:3000/api/groups/67000680b349144d821b8f49
 Content-Type: application/json
 
 {
-  "name": "Updated Group Name",
-  "password": "123"
+	"name": "string",
+	"password": "1234",
+	"imageUrl": "string",
+	"isPublic": true,
+	"introduction": "string"
 }
 
 ###
@@ -87,7 +90,7 @@ Content-Type: application/json
 ###
 
 //그룹 공감하기
-POST http://localhost:3000/api/groups/66f2d495e15027d32547/like
+POST http://localhost:3000/api/groups/6700170c665d69db2b37c07c/like
 
 ###
 
