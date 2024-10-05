@@ -1386,6 +1386,8 @@ app.post('/api/groups/:groupId/verify-password',asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   const password = req.body.password;
   const group = await Group.findById(groupId);
+  console.log("req body password", password);
+  console.log("DB group password", group.password);
   if(password === group.password){
     return res.status(200).send({message:"비밀번호가 확인되었습니다"});
   } else{

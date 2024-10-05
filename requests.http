@@ -41,12 +41,12 @@ Content-Type: application/json
 ###
 
 //그룹 수정(403 Forbidden)
-PATCH http://localhost:3000/api/groups/67000680b349144d821b8f49
+PATCH http://localhost:3000/api/groups/66f6c14c28b7612105bc0bdd
 Content-Type: application/json
 
 {
-	"name": "string",
-	"password": "1234",
+	"name": "10/5 13:35 수정 테스트",
+	"password": "securepassword",
 	"imageUrl": "string",
 	"isPublic": true,
 	"introduction": "string"
