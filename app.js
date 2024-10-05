@@ -10,6 +10,9 @@ import multer from 'multer';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import cron from 'node-cron';
+import fs from 'fs';
+import path from 'path';
+
 dotenv.config();
 
 const app = express();
@@ -19,6 +22,8 @@ app.use(cors());
 app.use('/uploads', express.static('uploads'));
 
 const upload = multer({dest:'uploads/'});
+
+//1년 배지 추가 로직 테스트 코드
 /*
 const createOneYearBadge = async() => {
   console.log("1년 된 그룹 배지 부여 테스트");
@@ -39,7 +44,7 @@ const createOneYearBadge = async() => {
       console.log(`그룹 ${group.name}에게 1년 달성 배지 추가`);
     }
     
-    console.log(currentDate, "날 배지 부여 완료");
+    console.log(currentDate, "날 배지 부여 체크 완료");
   }catch(err){
     console.log("오류메세지: ", err.message);
   }
@@ -54,7 +59,39 @@ app.post('/api/createOneYearBadge', async(req,res)=>{
   }
 });
 */
+
+//render/uploads에 저장된 imageFile 삭제 함수.
+
+const __dirname = path.resolve();
+console.log(__dirname);
+
+const deleteImage = (imageUrl) =>{
+  try{
+    console.log(imageUrl);
+    const fileNameArray = imageUrl.split('/uploads/');
+    console.log("fileName: ", fileNameArray);
+
+    if(!fileNameArray){
+      console.error('deleteImage함수 fileName 오류');
+      return;
+    }
+    const fileName = fileNameArray[1];
+    const filePath = path.join(__dirname, 'uploads' ,fileName);
+
+    fs.unlink(filePath,(err)=>{
+      if(err){
+        console.error('파일 삭제 중 오류 발생',err);
+      }else{
+        console.log(`파일 삭제 성공: ${imageUrl}`);
+      }
+    });
+  }catch(err){
+    console.error('파일 삭제 중 오류: ', err.message);
+  }
+}
 /*
+deleteImage('http://localhost:3000/uploads/e97e93093a45eac1d761849c361a372e');
+*/
 cron.schedule('0 0 * * *', async()=>{
   console.log("1년 배지 부여 작업");
 
@@ -79,8 +116,8 @@ cron.schedule('0 0 * * *', async()=>{
   }catch(err){
     console.log("오류메세지: ", err.message);
   }
-})
-*/
+});
+
 
 // Swagger 설정
 const swaggerOptions = {
@@ -1379,16 +1416,15 @@ app.patch('/api/groups/:groupId',asyncHandler(async (req,res)=>{
   if(!group){
     return res.status(404).send({message : "존재하지 않습니다"});
   }
-  const imageUrl = group.imageUrl;
   console.log("Received password from client:", req.body.password);
   console.log("type of received password: ", typeof req.body.password);
   console.log("Stored password in database:", group.password);
   console.log("stored password in Db: ", typeof group.password);
   if(group.password === req.body.password){
-    group.name = req.body.name;
-    group.imageUrl = req.body.imageUrl || imageUrl;
-    group.isPublic = Boolean(req.body.isPublic);
-    group.introduction = req.body.introduction;
+    group.name = req.body.name || group.name;
+    group.imageUrl = req.body.imageUrl || group.imageUrl;
+    group.isPublic = Boolean(req.body.isPublic) || group.isPublic;
+    group.introduction = req.body.introduction || group.introduction;
     const newgroup = await group.save();
     res.status(200).json({
       id: newgroup._id,
