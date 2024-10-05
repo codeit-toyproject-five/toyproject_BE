@@ -9,15 +9,78 @@ import swaggerJSDoc from 'swagger-jsdoc';
 import multer from 'multer';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
+import cron from 'node-cron';
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 app.use('/uploads', express.static('uploads'));
 
 const upload = multer({dest:'uploads/'});
+/*
+const createOneYearBadge = async() => {
+  console.log("1년 된 그룹 배지 부여 테스트");
+  try{
+
+    const currentDate = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(currentDate.getFullYear()-1);
+    oneYearAgo.setHours(0,0,0,0);
+
+    const oneYearAgoEnd = new Date(oneYearAgo.getTime()+(24*60*60*1000));
+
+    const groups = await Group.find({createdAt: {$gte: oneYearAgo, $lt: oneYearAgoEnd}});
+    
+    for(const group of groups){
+      group.badges.push('그룹 생성 후 1년 달성');
+      await group.save();
+      console.log(`그룹 ${group.name}에게 1년 달성 배지 추가`);
+    }
+    
+    console.log(currentDate, "날 배지 부여 완료");
+  }catch(err){
+    console.log("오류메세지: ", err.message);
+  }
+};
+
+app.post('/api/createOneYearBadge', async(req,res)=>{
+  try{
+    await createOneYearBadge();
+    res.status(200).send({message: "배지 부여 작업 완료"});
+  }catch(err){
+    res.status(500).send({message: "1년 배지 작업 중 요류: ", error: err.message});
+  }
+});
+*/
+/*
+cron.schedule('0 0 * * *', async()=>{
+  console.log("1년 배지 부여 작업");
+
+  try{
+
+    const currentDate = new Date();
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(currentDate.getFullYear()-1);
+    oneYearAgo.setHours(0,0,0,0);
+
+    const oneYearAgoEnd = new Date(oneYearAgo.getTime()+(24*60*60*1000));
+
+    const groups = await Group.find({createdAt: {$gte: oneYearAgo, $lt: oneYearAgoEnd}});
+    
+    for(const group of groups){
+      group.badges.push('그룹 생성 후 1년 달성');
+      await group.save();
+      console.log(`그룹 ${group.name}에게 1년 달성 배지 추가`);
+    }
+    
+    console.log(currentDate, "날 배지 부여 완료");
+  }catch(err){
+    console.log("오류메세지: ", err.message);
+  }
+})
+*/
 
 // Swagger 설정
 const swaggerOptions = {

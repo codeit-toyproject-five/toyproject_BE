@@ -166,3 +166,7 @@ POST http://localhost:3000/api/posts/66fe4754181c887b02a8c4ec/like
 
 //게시글 공개 여부 확인
 GET http://localhost:3000/api/posts/66fe4754181c887b02a8c4ec/is-public
+
+###
+
+POST http://localhost:3000/api/createOneYearBadge
