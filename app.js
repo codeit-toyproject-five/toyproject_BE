@@ -1524,6 +1524,7 @@ app.get('/api/groups/:groupId/is-public',asyncHandler(async(req,res)=>{
 //게시글 등록
 app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
+  console.log("게시글 등록 req.body",req.body);
   const group = Group.findById(groupId);
   const {nickname, title, content, postPassword, groupPassword,imageUrl, tags, location, moment, isPublic}=req.body;
   const post = new Post({
@@ -1543,6 +1544,21 @@ app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
     createdAt: Date.now(),
   });
   const savedPost = await post.save();
+  console.log("게시글 등록 response",{
+    id: savedPost._id,
+    groupId: savedPost.groupId,
+    nickname: savedPost.nickname,
+    title: savedPost.title,
+    content: savedPost.content,
+    imageUrl: savedPost.imageUrl,
+    tags: savedPost.tags,
+    location: savedPost.location,
+    moment: savedPost.moment,
+    isPublic: savedPost.isPublic,
+    likeCount: savedPost.likeCount,
+    commentCount: savedPost.commentCount,
+    createdAt: savedPost.createdAt
+  });
   group.postCount++;
   group.save();
   res.status(200).send({
