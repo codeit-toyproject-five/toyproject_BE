@@ -1606,7 +1606,7 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
     filter.title = { $regex: keyword, $options: 'i'};
   }
   if(isPublic!==undefined){
-    filter.isPublic = isPublic === 'true'? true: false;
+    filter.isPublic = isPublic === 'true';
   }
 
   //paging
@@ -1630,13 +1630,13 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
     .skip(skip)
     .limit(pageSize);
   
-    const totlaPostCount = await Post.countDocuments(filter);
-    const totalPages = Math.ceil(totlaPostCount/pageSize);
+    const totalPostCount = await Post.countDocuments(filter);
+    const totalPages = Math.ceil(totalPostCount/pageSize);
 
   res.status(200).json({
     currentPage: page,
     totalPages: totalPages,
-    totalItemCount: totlaPostCount,
+    totalItemCount: totalPostCount,
     data: posts.map(post=>({
       id: post._id,
       nickname: post.nickname,
@@ -1652,7 +1652,7 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
     }))
   })
   }catch(e){
-    return res.status(400).send({message: "잘못된 요청입니다"});
+    return res.status(400).send({message: e.message});
   }
 });
 
