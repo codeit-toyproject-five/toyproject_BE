@@ -1379,13 +1379,14 @@ app.patch('/api/groups/:groupId',asyncHandler(async (req,res)=>{
   if(!group){
     return res.status(404).send({message : "존재하지 않습니다"});
   }
+  const imageUrl = group.imageUrl;
   console.log("Received password from client:", req.body.password);
   console.log("type of received password: ", typeof req.body.password);
   console.log("Stored password in database:", group.password);
   console.log("stored password in Db: ", typeof group.password);
   if(group.password === req.body.password){
     group.name = req.body.name;
-    group.imageUrl = req.body.imageUrl;
+    group.imageUrl = req.body.imageUrl || imageUrl;
     group.isPublic = Boolean(req.body.isPublic);
     group.introduction = req.body.introduction;
     const newgroup = await group.save();
