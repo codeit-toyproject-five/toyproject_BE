@@ -1525,7 +1525,7 @@ app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
   console.log('게시글 등록: gorupID: ', groupId);
   console.log("게시글 등록 req.body",req.body);
-  const group = Group.findById(groupId);
+  const group = await Group.findById(groupId);
   if(!group){
     return res.status(404).send({message:"존재하지 않는 그룹입니다"});
   }
@@ -1563,7 +1563,7 @@ app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
     createdAt: savedPost.createdAt
   });
   group.postCount++;
-  group.save();
+  await group.save();
   res.status(200).send({
     id: savedPost._id,
     groupId: savedPost.groupId,
