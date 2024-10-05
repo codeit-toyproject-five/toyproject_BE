@@ -1523,16 +1523,20 @@ app.get('/api/groups/:groupId/is-public',asyncHandler(async(req,res)=>{
 //게시글 등록
 app.post('/api/groups/:groupId/posts', asyncHandler(async(req,res)=>{
   const groupId = req.params.groupId;
+  console.log('게시글 등록: gorupID: ', groupId);
   console.log("게시글 등록 req.body",req.body);
   const group = Group.findById(groupId);
-  const {nickname, title, content, postPassword, groupPassword,imageUrl, tags, location, moment, isPublic}=req.body;
+  if(!group){
+    return res.status(404).send({message:"존재하지 않는 그룹입니다"});
+  }
+  const {nickname, title, content, postPassword,imageUrl, tags, location, moment, isPublic}=req.body;
+
   const post = new Post({
     groupId: groupId,
     nickname,
     title,
     content,
     postPassword,
-    groupPassword,
     imageUrl,
     tags,
     location,
