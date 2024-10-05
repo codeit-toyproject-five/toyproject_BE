@@ -214,7 +214,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *       - in: path
  *         name: groupId
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The ID of the group to update
  *     requestBody:
