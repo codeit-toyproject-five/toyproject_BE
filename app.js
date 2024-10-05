@@ -1464,7 +1464,7 @@ app.get('/api/groups/:groupId',async (req,res)=>{
     const groupId = req.params.groupId;
 
     const group = await Group.findById(groupId);
-
+    console.log(typeof group.id);
     res.status(200).json({
       id: group._id,
       name: group.name,
@@ -1726,7 +1726,10 @@ app.get('api/posts/:postId',async(req,res)=>{
   try{
   const postId = req.params.postId;
   const post = await Post.findById(postId);
-
+  if(!post){
+    console.log("게시글 상세 정보 조회 postId 불일치");
+    return res.status(404).send({message: "추억을 찾을 수 없습니다"});
+  }
   res.status(200).json({
     id: post._id,
     groupId: post.groupId,
@@ -1743,7 +1746,8 @@ app.get('api/posts/:postId',async(req,res)=>{
     createdAt: post.createdAt
   });
   }catch(e){
-    res.status(400).send({message:"잘못된 요청입니다"});
+    console.log('게시글 상세 정보 보기 에러: ',e.message);
+    res.status(400).send(e.message);
   }
 });
 
