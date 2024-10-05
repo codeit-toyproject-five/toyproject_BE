@@ -1477,7 +1477,8 @@ app.get('/api/groups/:groupId',async (req,res)=>{
       introduction: group.introduction
     });
   }catch(e){
-    res.status(400).send({message:"잘못된 요청입니다"});
+    console.log("그룹 상세 정보 조회 api 에러: ",e.message);
+    res.status(400).send({message:e.message});
   }
 });
 
