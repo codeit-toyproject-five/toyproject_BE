@@ -1722,7 +1722,7 @@ app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
 }));
 
 //게시글 상세 정보 조회
-app.get('api/posts/:postId',async(req,res)=>{
+app.get('/api/posts/:postId',async(req,res)=>{
   try{
   const postId = req.params.postId;
   const post = await Post.findById(postId);

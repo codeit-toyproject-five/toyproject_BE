@@ -75,7 +75,7 @@ Content-Type: application/json
 ###
 
 //그룹 상세 정보 조회
-GET http://localhost:3000/api/groups/66f6c14c28b765bc0bdd
+GET http://localhost:3000/api/groups/67015c042a1b9224561d254a
 
 ###
 
@@ -170,3 +170,8 @@ GET http://localhost:3000/api/posts/66fe4754181c887b02a8c4ec/is-public
 ###
 
 POST http://localhost:3000/api/createOneYearBadge
+
+###
+
+//게시글 상세 정보 조회
+GET http://localhost:3000/api/posts/67017974e1128bf83356952d
