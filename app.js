@@ -77,7 +77,7 @@ const deleteImage = (imageUrl) =>{
     }
     const fileName = fileNameArray[1];
     const filePath = path.join(__dirname, 'uploads' ,fileName);
-
+    console.log('filePath: ', filePath);
     fs.unlink(filePath,(err)=>{
       if(err){
         console.error('파일 삭제 중 오류 발생',err);
@@ -89,9 +89,8 @@ const deleteImage = (imageUrl) =>{
     console.error('파일 삭제 중 오류: ', err.message);
   }
 }
-/*
-deleteImage('http://localhost:3000/uploads/e97e93093a45eac1d761849c361a372e');
-*/
+
+
 cron.schedule('0 0 * * *', async()=>{
   console.log("1년 배지 부여 작업");
 
@@ -1949,6 +1948,56 @@ app.delete('/api/comments/:commentId', async (req, res) => {
     return res.status(500).json({ message: '서버 에러가 발생했습니다' });
   }
 });
+/**
+ * @swagger
+ * /api/image:
+ *   post:
+ *     summary: Upload an image file
+ *     description: Uploads an image file to the server and returns the image URL
+ *     tags:
+ *       - Images
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to upload
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imageUrl:
+ *                   type: string
+ *                   example: http://localhost:3000/uploads/filename.jpg
+ *       400:
+ *         description: No image file provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 이미지 파일이 필요합니다
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 서버 에러
+ */
 
 // 이미지 업로드
 app.post('/api/image', upload.single('image'), async (req, res) => {
