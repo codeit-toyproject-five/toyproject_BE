@@ -118,7 +118,7 @@ Content-Type: application/json
 ###
 
 //게시글 목록 조회
-GET http://localhost:3000/api/groups/67015c042a1b9224561d254a/posts
+GET http://localhost:3000/api/groups/67015c042a1b9224561d254a/posts?sortBy=latest&page=1&pageSize=10
 
 ###
 

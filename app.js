@@ -1297,6 +1297,7 @@ function asyncHandler(handler){
     try{
       await handler(req,res);
     }catch(e){
+      console.log(e.message);
       if(e.name === 'CastError'){
         res.status(404).send({message: "존재하지 않습니다"});
       } else{
@@ -1652,6 +1653,7 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
     }))
   })
   }catch(e){
+    console.log(e.message);
     return res.status(400).send({message: e.message});
   }
 });
