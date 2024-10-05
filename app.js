@@ -1592,8 +1592,10 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
   const isPublic = req.query.isPublic;
 
   //groupId유효성 검사
-  await Group.findById(groupId);
-  
+  const group = await Group.findById(groupId);
+  if(!group){
+    return res.status(404).send({message:"존재하지 않는 그룹입니다"});
+  }
   const filter = {};
 
   //filter
