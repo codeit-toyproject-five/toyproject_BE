@@ -1772,7 +1772,8 @@ app.get('/api/posts/:postId',async(req,res)=>{
 //게시글 조회 권한 확인
 app.post('/api/posts/:postId/verify-password',async(req,res)=>{
   const postId = req.params.postId;
-  const postPassword = req.body.password;
+  console.log("게시글 조회 권한 확인", req.body);
+  const postPassword = req.body.postPassword;
 
   const post = await Post.findById(postId);
   
