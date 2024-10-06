@@ -154,7 +154,7 @@ POST http://localhost:3000/api/posts/66fe4754181c887b02a8c4ec/verify-password
 Content-Type: application/json
 
 {
-  "password": "s12ing"
+  "postPassword": "s12ing"
 }
 
 ###
