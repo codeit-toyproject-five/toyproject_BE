@@ -1909,6 +1909,93 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
     return res.status(500).json({ message: '서버 에러가 발생했습니다' });
   }
 });
+/**
+ * @swagger
+ * /api/comments/{commentId}:
+ *   patch:
+ *     summary: Update a comment
+ *     description: 수정할 댓글의 ID를 받아 댓글 내용을 수정합니다.
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the comment to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nickname:
+ *                 type: string
+ *                 description: The nickname of the comment author
+ *                 example: JohnDoe
+ *               content:
+ *                 type: string
+ *                 description: The updated content of the comment
+ *                 example: This is the updated comment content
+ *               password:
+ *                 type: string
+ *                 description: The password for the comment
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Comment updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   description: The ID of the updated comment
+ *                   example: 609e12633c7b5a001f25a255
+ *                 nickname:
+ *                   type: string
+ *                   description: The updated nickname of the comment author
+ *                   example: JohnDoe
+ *                 content:
+ *                   type: string
+ *                   description: The updated content of the comment
+ *                   example: This is the updated comment content
+ *                 createdAt:
+ *                   type: string
+ *                   description: The creation date of the comment
+ *                   format: date-time
+ *       403:
+ *         description: Incorrect password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 비밀번호가 틀렸습니다
+ *       404:
+ *         description: Comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 존재하지 않습니다
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 서버 에러가 발생했습니다
+ */
 
 // 댓글 수정
 app.patch('/api/comments/:commentId', async (req, res) => {
