@@ -1899,14 +1899,13 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
       totalItemCount,
       data: comments.map(comment => ({
         id: comment._id,
-        postTitle: comment.postId.title, // 게시물 제목 추가
         nickname: comment.nickname,
         content: comment.content,
         createdAt: comment.createdAt,
       })),
     });
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     return res.status(500).json({ message: '서버 에러가 발생했습니다' });
   }
 });
@@ -1916,9 +1915,6 @@ app.put('/api/comments/:commentId', async (req, res) => {
   const { commentId } = req.params;
   const { nickname, content, password } = req.body;
 
-  if (!nickname || !content || !password) {
-    return res.status(400).json({ message: '잘못된 요청입니다' });
-  }
 
   try {
     const comment = await Comment.findById(commentId);
@@ -1934,18 +1930,18 @@ app.put('/api/comments/:commentId', async (req, res) => {
     }
 
     // 댓글 내용을 수정
-    comment.nickname = nickname;
-    comment.content = content;
+    comment.nickname = nickname || comment.nickname;
+    comment.content = content || comment.content;
 
     // 수정된 댓글을 저장
-    await comment.save();
+    const newcomment = await comment.save();
 
     // 성공 응답
     return res.status(200).json({
-      id: comment._id,
-      nickname: comment.nickname,
-      content: comment.content,
-      createdAt: comment.createdAt,
+      id: newcomment._id,
+      nickname: newcomment.nickname,
+      content: newcomment.content,
+      createdAt: newcomment.createdAt,
     });
   } catch (error) {
     console.error(error);
