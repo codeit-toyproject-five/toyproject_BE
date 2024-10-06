@@ -1827,6 +1827,7 @@ app.get('/api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
 app.post('/api/posts/:postId/comments', async (req, res) => {
   const { postId } = req.params;
   const { nickname, content, password } = req.body;
+  console.log('댓글 등록 req.body: ', req.body);
 
   if (!nickname || !content || !password) {
     return res.status(400).json({ message: '잘못된 요청입니다' });
@@ -1851,6 +1852,12 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
     // 댓글 저장
     await newComment.save();
 
+    console.log("댓글 등록 res: ",{
+      id: newComment._id,
+      nickname: newComment.nickname,
+      content: newComment.content,
+      createdAt: newComment.createdAt,
+    });
     return res.status(200).json({
       id: newComment._id,
       nickname: newComment.nickname,
@@ -1858,7 +1865,7 @@ app.post('/api/posts/:postId/comments', async (req, res) => {
       createdAt: newComment.createdAt,
     });
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     return res.status(500).json({ message: '서버 에러가 발생했습니다' });
   }
 });
