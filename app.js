@@ -1769,7 +1769,7 @@ app.get('/api/posts/:postId',async(req,res)=>{
 });
 
 //게시글 조회 권한 확인
-app.post('/api/posts/:postId/verify-password',async(req,res)=>{
+app.post('/api/posts/:postId/verify-password',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   console.log('게시글 조회 권한 확인 req.params.postId: ', postId);
   console.log("게시글 조회 권한 확인", req.body);
@@ -1783,7 +1783,7 @@ app.post('/api/posts/:postId/verify-password',async(req,res)=>{
   if(post.postPassword === postPassword){
     res.status(200).send({message:"비밀번호가 확인되었습니다"});
   }
-});
+}));
 
 
 //게시글 공감하기
@@ -1812,7 +1812,7 @@ app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
 //게시글 공개 여부 확인
 app.get('/api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
-  console.log('게시글 공개 여부 확인 req.pararms.postId: ', postId);
+  console.log('게시글 공개 여부 확인 req.params.postId: ', postId);
   const post = await Post.findById(postId);
   if(!post){
     return res.status(404).send({message: "존재하지 않습니다"});
