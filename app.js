@@ -1769,18 +1769,18 @@ app.get('/api/posts/:postId',async(req,res)=>{
 });
 
 //게시글 조회 권한 확인
-app.post('/api/posts/:postId/verify-password',asyncHandler(async(req,res)=>{
-  const postId = req.params.postId;
-  console.log('게시글 조회 권한 확인 req.params.postId: ', postId);
+app.post('/api/posts/verify-password',asyncHandler(async(req,res)=>{
+  const postId = req.body.postId;
+  console.log('게시글 조회 권한 확인 req.body.postId: ', postId);
   console.log("게시글 조회 권한 확인", req.body);
-  const postPassword = req.body.postPassword;
+  const postPassword = req.body.password;
 
   const post = await Post.findById(postId);
   
   if(post.postPassword!==postPassword){
     return res.status(401).send({message: "비밀번호가 틀렸습니다"});
   }
-  if(post.postPassword === postPassword){
+  else{
     res.status(200).send({message:"비밀번호가 확인되었습니다"});
   }
 }));
