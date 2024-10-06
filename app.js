@@ -1662,7 +1662,7 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
 //게시글 수정
 app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const req_body = req.body;
-  console.log("게시글 수정 req body: ", req.body);
+  console.log("게시글 수정 req body: ", req_body);
   const postId = req.params.postId;
   const post = await Post.findById(postId);
   const postPassword = req_body.postPassword;
@@ -1674,14 +1674,14 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
     console.log("req.body 게시글 비밀번호",postPassword);
     return res.status(403).send({message:"비밀번호가 틀렸습니다"});
   }
-  post.nickname = req_body.nickname;
-  post.title = req_body.title;
-  post.content = req_body.content;
-  post.imageUrl = req_body.imageUrl;
-  post.tags = req_body.tags;
-  post.location = req_body.location;
-  post.moment = req_body.moment;
-  post.isPublic = req_body.isPublic;
+  post.nickname = req_body.nickname || post.nickname;
+  post.title = req_body.title || post.title;
+  post.content = req_body.content || post.content;
+  post.imageUrl = req_body.imageUrl || post.imageUrl;
+  post.tags = req_body.tags || post.tags;
+  post.location = req_body.location || post.location;
+  post.moment = req_body.moment || post.moment;
+  post.isPublic = req_body.isPublic || post.isPublic;
 
   const newpost = await post.save();
   console.log("게시글 수정 res body",{
