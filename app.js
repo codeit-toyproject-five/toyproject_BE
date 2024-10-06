@@ -1680,7 +1680,7 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   post.imageUrl = req_body.imageUrl || post.imageUrl;
   post.tags = req_body.tags || post.tags;
   post.location = req_body.location || post.location;
-  post.moment = req_body.moment || post.moment;
+  post.moment = req_body.date || post.moment;
   post.isPublic = req_body.isPublic || post.isPublic;
 
   const newpost = await post.save();
