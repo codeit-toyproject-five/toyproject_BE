@@ -1464,7 +1464,6 @@ app.get('/api/groups/:groupId',async (req,res)=>{
     const groupId = req.params.groupId;
 
     const group = await Group.findById(groupId);
-    console.log(typeof group.id);
     res.status(200).json({
       id: group._id,
       name: group.name,
@@ -1772,6 +1771,7 @@ app.get('/api/posts/:postId',async(req,res)=>{
 //게시글 조회 권한 확인
 app.post('/api/posts/:postId/verify-password',async(req,res)=>{
   const postId = req.params.postId;
+  console.log('게시글 조회 권한 확인 req.params.postId: ', postId);
   console.log("게시글 조회 권한 확인", req.body);
   const postPassword = req.body.postPassword;
 
