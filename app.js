@@ -1914,8 +1914,8 @@ app.get('/api/posts/:postId/comments', async (req, res) => {
 app.put('/api/comments/:commentId', async (req, res) => {
   const { commentId } = req.params;
   const { nickname, content, password } = req.body;
-
-
+  console.log("댓글 수정 commentId", commentId);
+  console.log("댓글 수정 req.body: ", req.body);
   try {
     const comment = await Comment.findById(commentId);
 
