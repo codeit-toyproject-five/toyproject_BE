@@ -1662,13 +1662,18 @@ app.get('/api/groups/:groupId/posts', async(req,res)=>{
 //게시글 수정
 app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const req_body = req.body;
+  console.log("게시글 수정 req body: ", req.body);
   const postId = req.params.postId;
   const post = await Post.findById(postId);
   const postPassword = req_body.postPassword;
   if(!post){
     return res.status(404).send({message: "존재하지 않습니다"});
   }
-
+  if(post.postPassword !== postPassword){
+    console.log("DB 게시글 비밀번호:",post.postPassword);
+    console.log("req.body 게시글 비밀번호",postPassword);
+    return res.status(403).send({message:"비밀번호가 틀렸습니다"});
+  }
   post.nickname = req_body.nickname;
   post.title = req_body.title;
   post.content = req_body.content;
@@ -1678,14 +1683,22 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
   post.moment = req_body.moment;
   post.isPublic = req_body.isPublic;
 
-  if(post.postPassword !== postPassword){
-    console.log(post.postPassword);
-    console.log(postPassword);
-    return res.status(403).send({message:"비밀번호가 틀렸습니다"});
-  }
-
   const newpost = await post.save();
-
+  console.log("게시글 수정 res body",{
+    id: newpost._id,
+    groupId: newpost.groupId,
+    nickname: newpost.nickname,
+    title: newpost.title,
+    content: newpost.content,
+    imageUrl: newpost.imageUrl,
+    tags: newpost.tags,
+    location: newpost.location,
+    moment: newpost.moment,
+    isPublic: newpost.isPublic,
+    likeCount: newpost.likeCount,
+    commentCount: newpost.commentCount,
+    createdAt: newpost.createdAt
+  });
   res.status(200).json({
     id: newpost._id,
     groupId: newpost.groupId,
