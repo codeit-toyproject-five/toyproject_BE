@@ -1720,10 +1720,13 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
 app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
   console.log("게시글 postId", postId);
-  const postPassword = req.body.password;
+  const postPassword = req.body.postPassword;
   console.log("게시글 삭제 req.body", req.body);
   const post = await Post.findById(postId);
   const group = await Group.findById(post.groupId);
+  if(!group){
+    return res.status(404).send({message: "상위 그룹이 존재하지 않습니다"});
+  }
   if(!post){
     return res.status(404).send({message: "존재하지 않습니다"});
   }
