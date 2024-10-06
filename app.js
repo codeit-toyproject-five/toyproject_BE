@@ -1812,11 +1812,11 @@ app.post('/api/posts/:postId/like',asyncHandler(async(req,res)=>{
 //게시글 공개 여부 확인
 app.get('/api/posts/:postId/is-public',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
+  console.log('게시글 공개 여부 확인 req.pararms.postId: ', postId);
   const post = await Post.findById(postId);
   if(!post){
     return res.status(404).send({message: "존재하지 않습니다"});
   }
-
   res.status(200).json({
     id: post._id,
     isPublic: post.isPublic,
