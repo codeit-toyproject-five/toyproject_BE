@@ -1719,7 +1719,9 @@ app.patch('/api/posts/:postId',asyncHandler(async(req,res)=>{
 //게시글 삭제
 app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
   const postId = req.params.postId;
+  console.log("게시글 postId", postId);
   const postPassword = req.body.password;
+  console.log("게시글 삭제 req.body", req.body);
   const post = await Post.findById(postId);
   const group = await Group.findById(post.groupId);
   if(!post){
@@ -1730,7 +1732,7 @@ app.delete('/api/posts/:postId',asyncHandler(async(req,res)=>{
   }
   await Post.findByIdAndDelete(postId);
   group.postCount--;
-  group.save();
+  await group.save();
   res.status(200).send({message: "게시글 삭제 성공"});
 }));
 
