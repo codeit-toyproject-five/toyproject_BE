@@ -16,7 +16,6 @@ import path from 'path';
 dotenv.config();
 
 const app = express();
-const path = require('path');
 app.use(express.json());
 app.use(cors());
 app.use('/uploads', express.static(path.join('/opt/render/project/src'
