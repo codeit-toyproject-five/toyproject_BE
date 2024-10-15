@@ -16,10 +16,11 @@ import path from 'path';
 dotenv.config();
 
 const app = express();
-
+const path = require('path');
 app.use(express.json());
 app.use(cors());
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join('/opt/render/project/src'
+  ,'uploads')));
 
 const upload = multer({dest:'uploads/'});
 
@@ -1454,7 +1455,6 @@ app.delete('/api/groups/:groupId',asyncHandler(async (req,res)=>{
     return res.status(403).send({message: "비밀번호가 틀렸습니다"});
   }
   await Group.findByIdAndDelete(groupId);
-  const posts = Post.find(groupId===groupId);
   res.status(200).send({message: "그룹 삭제 성공"});
 }));
 
@@ -2320,6 +2320,8 @@ app.post('/api/image', upload.single('image'), async (req, res) => {
 /*
 mongoose.connect(DATABASE_URL).then(() => console.log('Connected to DB'));
 */
+
+
 mongoose.connect(process.env.DATABASE_URL).then(() => {
   console.log('Connected to MongoDB');
 }).catch(err => {
